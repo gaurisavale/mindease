@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="MindEase is an AI mental wellness companion with CBT tools, self-check assessments and a rule-based crisis safety layer.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff6b35%22 stroke-width=%222.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z%22/%3E%3C/svg%3E">
+<title>MindEase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: warm blush page, coral accent; landing scrolls, Assessment and Chat are focused app views with their own header */
+:root{
+  --bg:#fbf6f4; --bg-2:#f7eeeb; --surface:#ffffff; --blush:#fbe4e2; --blush-2:#fdf0ee;
+  --fg:#16110f; --fg-2:#4a3f3a; --muted:#7d706a; --line:#ecdcd7;
+  --accent:#ff6b35; --accent-ink:#ffffff; --accent-soft:#ffe3d6; --accent-text:#e2541f;
+  --art-pink:#f58ab8; --art-orange:#ff9a4d;
+  --ok:#2f8f5b; --ok-soft:#dcf2e5; --warn:#b7791f; --warn-soft:#fbefd5; --crit:#c2362b; --crit-soft:#fde2df;
+  --shadow:0 1px 2px rgba(60,30,20,.05),0 8px 24px rgba(60,30,20,.06);
+  --f-display:"Archivo","Noto Sans Devanagari",system-ui,sans-serif;
+  --f-body:"Space Grotesk","Noto Sans Devanagari",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15100e; --bg-2:#1b1513; --surface:#211a17; --blush:#2e201c; --blush-2:#271c19;
+  --fg:#f7eee9; --fg-2:#d6c8c1; --muted:#a3948d; --line:#3a2c27;
+  --accent:#ff7a47; --accent-ink:#1a0f0a; --accent-soft:#40261b; --accent-text:#ff8f62;
+  --art-pink:#c35f8c; --art-orange:#d7733a;
+  --ok:#6fd39b; --ok-soft:#173326; --warn:#f0bb5d; --warn-soft:#3a2c12; --crit:#ff8a7e; --crit-soft:#3e1d1a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15100e; --bg-2:#1b1513; --surface:#211a17; --blush:#2e201c; --blush-2:#271c19;
+  --fg:#f7eee9; --fg-2:#d6c8c1; --muted:#a3948d; --line:#3a2c27;
+  --accent:#ff7a47; --accent-ink:#1a0f0a; --accent-soft:#40261b; --accent-text:#ff8f62;
+  --art-pink:#c35f8c; --art-orange:#d7733a;
+  --ok:#6fd39b; --ok-soft:#173326; --warn:#f0bb5d; --warn-soft:#3a2c12; --crit:#ff8a7e; --crit-soft:#3e1d1a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}
+
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body.app-mode{overflow:hidden}
+html:has(body.app-mode){height:100%}
+body.app-mode{height:100%}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.narrow{max-width:820px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:14px 22px;font-weight:700;font-size:16px;border:1.5px solid transparent;text-decoration:none;transition:transform .15s ease,background .15s ease,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px -6px var(--accent)}
+.btn-ghost{background:var(--surface);color:var(--accent-text);border-color:var(--accent-soft)}
+.btn-sm{padding:8px 14px;font-size:14px;border-radius:10px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--accent-soft);background:var(--surface);color:var(--accent-text);font-size:14px;font-weight:500}
+button.chip:hover{background:var(--accent-soft)}
+
+/* ---------- top nav ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:22px;text-decoration:none}
+.brand .ico{color:var(--accent);width:28px;height:28px}
+.nav-links{display:flex;gap:24px;font-weight:500}
+.nav-links a{text-decoration:none;color:var(--fg-2)}
+.nav-links a:hover{color:var(--accent-text)}
+.theme-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:38px;height:38px;display:grid;place-items:center}
+.nav-right{display:flex;align-items:center;gap:16px}
+@media (max-width:760px){.nav-links{display:none}}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(180deg,var(--blush-2),var(--bg));}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding-block:64px 72px}
+.hero h1{font-size:clamp(44px,6.4vw,84px);line-height:.95;font-weight:900;letter-spacing:-.03em;text-transform:uppercase}
+.hero h1 .hl{color:var(--accent)}
+.hero h1 span{display:block}
+.hero-tag{display:inline-block;margin-top:22px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:15px;padding:10px 20px;border-radius:999px}
+.hero-desc{margin-top:22px;font-size:19px;font-weight:500;color:var(--fg-2);max-width:30ch;line-height:1.6}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+.lang-box{margin-top:28px;background:var(--blush);border-radius:18px;padding:18px 20px;max-width:560px}
+.lang-box h4{display:flex;align-items:center;gap:8px;font-family:var(--f-body);font-size:16px;font-weight:700;margin-bottom:12px}
+.lang-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lang-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;border:1.5px solid var(--accent-soft);background:var(--blush-2);color:var(--accent-text);font-weight:600}
+.lang-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lang-btn .code{font-family:var(--f-mono);font-size:11px;opacity:.75}
+
+.hero-art{background:var(--blush);border-radius:32px;padding:28px;position:relative;min-width:0}
+.badge-247{position:absolute;top:14px;right:14px;z-index:3;background:var(--blush);border:1px solid var(--accent-soft);padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px}
+.stage{position:relative;aspect-ratio:5/4.3;max-width:100%;border-radius:20px;overflow:hidden;background:linear-gradient(100deg,var(--art-pink) 0 34%,var(--art-orange) 34% 100%)}
+.stage .sun{position:absolute;border-radius:50%;background:rgba(255,255,255,.22)}
+.stage .ring{position:absolute;left:8%;bottom:10%;width:30%;aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,255,255,.7);display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;animation:breathe 8s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(.82)}50%{transform:scale(1.05)}}
+.mini-chat{position:absolute;right:6%;top:12%;width:64%;background:var(--surface);border-radius:18px;box-shadow:0 20px 40px -12px rgba(80,30,10,.35);padding:16px;display:flex;flex-direction:column;gap:10px}
+.mini-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.dot-av{width:26px;height:26px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.dot-av .ico{width:15px;height:15px}
+.mb{font-size:13px;line-height:1.45;padding:8px 12px;border-radius:14px;max-width:88%}
+.mb.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
+.mb.b{background:var(--blush);border-bottom-left-radius:4px}
+.mini-pipe{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+.mini-pipe span{background:var(--bg-2);padding:3px 7px;border-radius:6px}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr;padding-block:40px 48px}.hero-art{order:2}.hero-desc{max-width:40ch}}
+@media (max-width:480px){.mini-chat{width:80%;right:5%}.stage .ring{display:none}.lang-row{grid-template-columns:1fr}}
+
+/* ---------- sections ---------- */
+section.block{padding-block:88px}
+.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:40px;max-width:640px}
+.sec-head h2{font-size:clamp(30px,4vw,46px);font-weight:800;line-height:1.05}
+.sec-head p{color:var(--fg-2);font-size:17px}
+.alt{background:var(--bg-2)}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.feat .ic{width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.feat .ic .ico{width:24px;height:24px}
+.feat h3{font-size:20px;font-weight:700}
+.feat p{color:var(--fg-2);font-size:15px}
+@media (max-width:900px){.feat-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.feat-grid{grid-template-columns:1fr}}
+
+.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:step}
+.pstep{position:relative;padding:22px 20px 22px 0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pstep .n{font-family:var(--f-mono);font-size:13px;color:var(--accent-text);font-weight:600}
+.pstep h4{font-size:18px;font-weight:700}
+.pstep p{font-size:14px;color:var(--fg-2)}
+.pstep .bar{height:4px;border-radius:4px;background:var(--line);margin-bottom:10px;position:relative}
+.pstep .bar::after{content:"";position:absolute;inset:0;border-radius:4px;background:var(--accent);transform-origin:left;transform:scaleX(.35)}
+.pstep.crisis .bar::after{background:var(--crit);transform:scaleX(1)}
+.pstep.crisis .n{color:var(--crit)}
+@media (max-width:900px){.pipeline{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pipeline{grid-template-columns:1fr}}
+
+.tools{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:18px}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tool h3{font-size:22px;font-weight:800}
+.tool .sub{color:var(--fg-2);font-size:15px}
+.patterns{display:flex;flex-wrap:wrap;gap:8px}
+.affirm-card{background:var(--blush);border-radius:14px;padding:22px;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.25;min-height:120px;display:flex;align-items:center}
+.journal-prompt{font-weight:600;font-size:15px;background:var(--bg-2);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.journal-prompt button{border:none;background:none;color:var(--accent-text);font-size:13px;font-weight:600;white-space:nowrap}
+textarea,input[type=text]{font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
+textarea{min-height:110px;resize:vertical}
+.entries{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}
+.entry{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.entry .meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.tone{font-family:var(--f-mono);font-size:11px;padding:2px 7px;border-radius:6px}
+.tone.pos{background:var(--ok-soft);color:var(--ok)}.tone.neg{background:var(--crit-soft);color:var(--crit)}.tone.neu{background:var(--bg-2);color:var(--muted)}
+@media (max-width:980px){.tools{grid-template-columns:1fr 1fr}.tool.journal{grid-column:1/-1}}
+@media (max-width:620px){.tools{grid-template-columns:1fr}}
+
+.results{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.tile .v{font-family:var(--f-display);font-weight:900;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:18px;font-weight:700;color:var(--muted)}
+.tile .l{font-weight:600;margin-top:8px}
+.tile .t{font-size:13px;color:var(--muted);font-family:var(--f-mono);margin-top:2px}
+.ux{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.ux h3{font-size:18px;font-weight:700}
+.uxrow{display:grid;grid-template-columns:140px 1fr 40px;gap:12px;align-items:center;font-size:14px}
+.uxbar{height:12px;border-radius:6px;background:var(--bg-2);overflow:hidden;position:relative}
+.uxbar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:6px}
+.uxrow.top i{background:var(--accent-text)}
+.uxrow b{font-variant-numeric:tabular-nums;text-align:right}
+.axis{display:grid;grid-template-columns:140px 1fr 40px;gap:12px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.axis div:nth-child(2){display:flex;justify-content:space-between}
+.src{font-size:13px;color:var(--muted)}
+@media (max-width:900px){.results{grid-template-columns:1fr}}
+@media (max-width:460px){.uxrow,.axis{grid-template-columns:96px 1fr 34px}}
+
+.about{display:grid;grid-template-columns:1.3fr 1fr;gap:40px}
+.about p{color:var(--fg-2);font-size:17px;max-width:62ch}
+.about .stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.stack span{font-family:var(--f-mono);font-size:13px;background:var(--surface);border:1px solid var(--line);padding:5px 10px;border-radius:8px}
+.team{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px;align-self:start}
+.team dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:15px}
+.team dt{color:var(--muted)}
+.team dd{margin:0;font-weight:600}
+@media (max-width:860px){.about{grid-template-columns:1fr}}
+
+.lines{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.line{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px}
+.line .who{font-weight:700}
+.line .where{font-size:13px;color:var(--muted)}
+.num-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.num{font-family:var(--f-mono);font-size:20px;font-weight:600;user-select:all;color:var(--accent-text)}
+.copy{border:1px solid var(--line);background:var(--bg);border-radius:8px;font-size:12px;padding:4px 10px}
+@media (max-width:900px){.lines{grid-template-columns:1fr 1fr}}
+@media (max-width:500px){.lines{grid-template-columns:1fr}}
+.disclaimer{margin-top:24px;background:var(--blush);border-radius:14px;padding:16px 18px;font-size:14px;color:var(--fg-2)}
+
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ---------- app header (assess/chat) ---------- */
+.apphead{background:var(--surface);border-bottom:1px solid var(--line);flex:none}
+.apphead .wrap{max-width:820px;display:flex;align-items:center;gap:16px;min-height:68px;padding-block:10px}
+.back{display:flex;align-items:center;gap:6px;border:none;background:none;font-size:14px;font-weight:500;padding:6px 4px}
+.apptitle{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.apptitle h2{font-family:var(--f-body);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.mode{font-family:var(--f-mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--ok-soft);color:var(--ok)}
+.mode.off{background:var(--warn-soft);color:var(--warn)}
+.risk{font-family:var(--f-mono);font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;background:var(--bg-2)}
+.risk.elevated{background:var(--warn-soft);color:var(--warn)}.risk.high{background:var(--crit-soft);color:var(--crit)}.risk.none,.risk.low{background:var(--ok-soft);color:var(--ok)}
+.apptitle p{font-size:14px;color:var(--muted)}
+.bot-av{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.head-actions{display:flex;gap:8px;align-items:center}
+@media (max-width:560px){.head-actions .lbl{display:none}.apptitle p{display:none}}
+
+/* ---------- assessment ---------- */
+#view-assess{min-height:100%;display:flex;flex-direction:column}
+.assess-main{padding-block:44px 64px}
+.assess-main h1{font-size:clamp(28px,4vw,38px);font-weight:800;text-align:center}
+.assess-main .lead{text-align:center;color:var(--fg-2);font-size:17px;max-width:52ch;margin:12px auto 36px}
+.cond-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.cond{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;transition:border-color .15s,box-shadow .15s,transform .15s}
+.cond:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-2px)}
+.cond .ic{width:56px;height:56px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.cond .ic .ico{width:26px;height:26px}
+.cond h3{font-size:20px;font-weight:700}
+.cond p{font-size:14px;color:var(--fg-2)}
+.cond .tag{margin-top:auto;font-size:12px;background:var(--blush-2);border-radius:999px;padding:4px 10px;width:100%}
+.cond .tool-name{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+@media (max-width:820px){.cond-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.cond-grid{grid-template-columns:1fr}}
+
+.q-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:640px;margin:0 auto}
+.q-progress{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-family:var(--f-mono);margin-bottom:8px}
+.q-track{height:6px;background:var(--bg-2);border-radius:6px;overflow:hidden;margin-bottom:24px}
+.q-track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q-stem{font-size:14px;color:var(--muted);margin-bottom:6px}
+.q-text{font-family:var(--f-display);font-size:24px;font-weight:700;line-height:1.25;margin-bottom:24px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;justify-content:space-between;align-items:center;text-align:left;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:14px 16px;font-weight:500}
+.opt:hover,.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt .pts{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.q-nav{display:flex;justify-content:space-between;margin-top:20px}
+.linkbtn{border:none;background:none;color:var(--accent-text);font-weight:600;padding:6px 0}
+.linkbtn:disabled{color:var(--muted);cursor:default}
+
+.res-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin:18px auto 24px}
+.res-icon .ico{width:30px;height:30px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.res-card h3{font-size:24px;font-weight:700}
+.res-card p{color:var(--fg-2);max-width:60ch}
+.sev{display:inline-flex;gap:10px;align-items:center;font-weight:700;font-size:14px;padding:6px 14px;border-radius:999px}
+.sev.minimal,.sev.mild{background:var(--ok-soft);color:var(--ok)}
+.sev.moderate{background:var(--warn-soft);color:var(--warn)}
+.sev.severe{background:var(--crit-soft);color:var(--crit)}
+.scale{width:100%;max-width:480px}
+.scale-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;gap:2px}
+.scale-bar span{flex:1}
+.scale-bar span:nth-child(1){background:var(--ok)}.scale-bar span:nth-child(2){background:color-mix(in srgb,var(--ok) 50%,var(--warn))}.scale-bar span:nth-child(3){background:var(--warn)}.scale-bar span:nth-child(4){background:var(--crit)}
+.scale-mark{position:relative;height:18px}
+.scale-mark i{position:absolute;top:2px;width:2px;height:14px;background:var(--fg);transform:translateX(-1px)}
+.scale-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:var(--f-mono)}
+.note{background:var(--blush);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--fg-2);width:100%}
+.res-h{font-size:24px;font-weight:700;text-align:center;margin:40px 0 20px}
+.sugg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sugg{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.sugg h4{font-family:var(--f-body);font-size:16px;font-weight:700}
+.sugg p{font-size:14px;color:var(--fg-2);flex:1}
+.sugg .btn{justify-content:center}
+@media (max-width:760px){.sugg-grid{grid-template-columns:1fr}}
+.crisis-box{border:1.5px solid var(--crit);background:var(--crit-soft);border-radius:14px;padding:18px;text-align:left;width:100%;display:flex;flex-direction:column;gap:8px}
+.crisis-box b{color:var(--crit)}
+.crisis-box ul{margin:0;padding-left:18px;font-size:14px}
+.crisis-box .n{font-family:var(--f-mono);font-weight:600;user-select:all}
+
+/* ---------- chat ---------- */
+#view-chat{height:100%;display:flex;flex-direction:column;background:var(--bg)}
+.chat-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr;position:relative}
+.chat-body.inspect{grid-template-columns:1fr 360px}
+.chat-col{display:flex;flex-direction:column;min-height:0;min-width:0}
+.msgs{flex:1;overflow-y:auto;padding-block:20px}
+.msgs .wrap{max-width:820px;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:10px;align-items:flex-start;max-width:100%}
+.msg .av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none;margin-top:2px}
+.msg .av .ico{width:16px;height:16px}
+.bubble{padding:12px 16px;border-radius:16px;max-width:min(620px,85%);min-width:0;overflow-wrap:anywhere}
+.msg.bot .bubble{background:var(--blush-2);border:1px solid var(--accent-soft);border-top-left-radius:4px}
+.msg.user{justify-content:flex-end}
+.msg.user .bubble{background:var(--accent);color:var(--accent-ink);border-top-right-radius:4px}
+.bubble .txt{white-space:pre-wrap}
+.bubble .time{font-size:12px;color:var(--muted);margin-top:6px}
+.msg.user .time{color:color-mix(in srgb,var(--accent-ink) 75%,transparent)}
+.bubble .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.bubble .chips .chip{font-size:13px;padding:5px 11px}
+.msg.crisis .bubble{background:var(--crit-soft);border-color:var(--crit)}
+.helplist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.help-item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:10px 12px;flex-wrap:wrap}
+.help-item .hn{font-family:var(--f-mono);font-weight:600;user-select:all;color:var(--crit)}
+.help-item small{display:block;color:var(--muted);font-size:12px}
+.record{margin-top:10px;background:var(--surface);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.record dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.record dd{margin:0}
+.trap{display:inline-block;margin-top:8px;font-size:12px;font-family:var(--f-mono);background:var(--warn-soft);color:var(--warn);padding:3px 8px;border-radius:6px}
+.typing{display:flex;gap:4px;padding:4px 2px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.4;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.quick{flex:none;padding-block:10px}
+.quick .wrap{max-width:820px}
+.quick p{font-size:14px;color:var(--muted);margin-bottom:8px}
+.quick .row{display:flex;flex-wrap:wrap;gap:8px}
+.composer{flex:none;background:var(--surface);border-top:1px solid var(--line);padding-block:14px calc(14px + env(safe-area-inset-bottom,0px))}
+.composer form{max-width:820px;display:flex;gap:10px}
+.composer input{flex:1;min-width:0;border-radius:14px;background:var(--bg)}
+.send{width:50px;height:50px;border-radius:14px;border:none;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.send:disabled{opacity:.45;cursor:default}
+.privacy-line{max-width:820px;font-size:12px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.privacy-line .ico{width:13px;height:13px}
+
+.inspector{border-left:1px solid var(--line);background:var(--surface);overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.inspector h3{font-family:var(--f-body);font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.inspector .close-i{border:none;background:none;color:var(--muted);font-size:13px}
+#inspectBody{display:flex;flex-direction:column;gap:22px}
+.i-sec{display:flex;flex-direction:column;gap:8px}
+.i-lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.i-lbl span{font-family:var(--f-mono);letter-spacing:0;text-transform:none}
+.toks{display:flex;flex-wrap:wrap;gap:5px}
+.tok{font-family:var(--f-mono);font-size:12px;background:var(--bg-2);border-radius:6px;padding:3px 7px}
+.tok.s-pos{background:var(--ok-soft);color:var(--ok)}.tok.s-neg{background:var(--crit-soft);color:var(--crit)}.tok.kw{outline:1.5px solid var(--accent);outline-offset:-1.5px}
+.sent-scale{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--crit),var(--bg-2) 50%,var(--ok))}
+.sent-scale i{position:absolute;top:-4px;width:4px;height:18px;border-radius:2px;background:var(--fg);transform:translateX(-2px);transition:left .3s}
+.sent-ticks{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.ibar{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;font-size:13px;font-family:var(--f-mono)}
+.ibar .t{height:8px;border-radius:4px;background:var(--bg-2);overflow:hidden}
+.ibar .t i{display:block;height:100%;background:var(--accent)}
+.ibar b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.flag{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px}
+.flag.pass{background:var(--ok-soft);color:var(--ok)}.flag.hit{background:var(--crit-soft);color:var(--crit)}
+.route{display:flex;gap:6px;flex-wrap:wrap}
+.route span{font-family:var(--f-mono);font-size:12px;padding:5px 9px;border-radius:7px;border:1px solid var(--line);color:var(--muted)}
+.route span.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.route span.on.crit{background:var(--crit);border-color:var(--crit);color:#fff}
+.i-empty{font-size:14px;color:var(--muted)}
+.mem{font-family:var(--f-mono);font-size:12px;background:var(--bg-2);border-radius:8px;padding:10px;white-space:pre-wrap}
+@media (max-width:900px){
+  .chat-body.inspect{grid-template-columns:1fr}
+  .inspector{position:absolute;left:0;right:0;bottom:0;max-height:62%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -12px 30px rgba(0,0,0,.15);border-radius:18px 18px 0 0;z-index:5;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+}
+
+/* ---------- breathing overlay ---------- */
+.overlay{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(8px);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.breath-card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:28px;width:min(440px,100%);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.breath-card h3{font-size:22px;font-weight:800}
+.circle-wrap{width:220px;height:220px;max-width:100%;display:grid;place-items:center;position:relative}
+.circle{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--art-orange),var(--accent));transform:scale(.45);transition-property:transform;transition-timing-function:ease-in-out;display:grid;place-items:center}
+.circle-txt{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-family:var(--f-display);font-weight:800;font-size:22px;text-shadow:0 1px 6px rgba(0,0,0,.25);pointer-events:none}
+.circle-txt small{display:block;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.breath-meta{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.patterns .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  </defs>
+</svg>
+
+<!-- ======================= HOME ======================= -->
+<div id="view-home">
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top" data-go="home"><svg class="ico"><use href="#i-heart"/></svg>MindEase</a>
+      <div class="nav-right">
+        <nav class="nav-links">
+          <a href="#features" data-i18n="navFeatures">Features</a>
+          <a href="#how" data-i18n="navHow">How it works</a>
+          <a href="#tools" data-i18n="navTools">Toolkit</a>
+          <a href="#about" data-i18n="navAbout">About</a>
+          <a href="#support" data-i18n="navSupport">Support</a>
+        </nav>
+        <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode"><svg class="ico"><use href="#i-moon"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <h1><span data-i18n="h1a">Your mental</span><span class="hl" data-i18n="h1b">wellness</span><span data-i18n="h1c">companion.</span></h1>
+        <span class="hero-tag" data-i18n="tag">Safe • Supportive • Always Available</span>
+        <p class="hero-desc" data-i18n="desc">Connect with our AI companion for personalized mental health support, assessments, and guidance designed specifically for teens.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#chat"><svg class="ico"><use href="#i-msg"/></svg><span data-i18n="startChat">Start Chatting</span></a>
+          <a class="btn btn-ghost" href="#assess"><svg class="ico"><use href="#i-clip"/></svg><span data-i18n="takeAssess">Take Assessment</span></a>
+        </div>
+        <div class="lang-box">
+          <h4><svg class="ico"><use href="#i-globe"/></svg><span data-i18n="chooseLang">Choose Your Language</span></h4>
+          <div class="lang-row">
+            <button class="lang-btn" data-lang="en" aria-pressed="true"><span class="code">EN</span>English</button>
+            <button class="lang-btn" data-lang="hi" aria-pressed="false"><span class="code">HI</span>हिंदी</button>
+            <button class="lang-btn" data-lang="mr" aria-pressed="false"><span class="code">MR</span>मराठी</button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="badge-247">24/7 Support</span>
+        <div class="stage">
+          <span class="sun" style="width:46%;aspect-ratio:1;left:-10%;top:-12%"></span>
+          <span class="sun" style="width:28%;aspect-ratio:1;right:-6%;bottom:-8%"></span>
+          <div class="ring">breathe</div>
+          <div class="mini-chat">
+            <div class="mini-head"><span class="dot-av"><svg class="ico"><use href="#i-bot"/></svg></span>MindEaseChat</div>
+            <div class="mb u">exams next week and I can't stop overthinking</div>
+            <div class="mb b">That pressure is real. Let's slow it down: what's the thought that keeps coming back?</div>
+            <div class="mini-pipe"><span>sentiment −0.58</span><span>intent: academic</span><span>crisis: pass</span><span>route: CBT</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Features</span>
+        <h2>Support that meets you where you are</h2>
+        <p>MindEase combines a conversational companion with evidence-based Cognitive Behavioral Therapy tools, built for first-tier support, not as a replacement for professional care.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-msg"/></svg></div><h3>AI companion chat</h3><p>LLM-powered replies grounded in CBT, with memory of the conversation and one practical next step each time.</p></div>
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-clip"/></svg></div><h3>Self-check assessments</h3><p>Six short screeners, including the validated PHQ-9 and GAD-7, with clear results and tailored suggestions.</p></div>
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-wind"/></svg></div><h3>CBT toolkit</h3><p>Guided breathing, grounding, thought reframing with thinking-trap detection, affirmations, and journaling.</p></div>
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-alert"/></svg></div><h3>Crisis detection</h3><p>Every message is screened for signs of self-harm before anything else runs, with immediate helpline referral.</p></div>
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-globe"/></svg></div><h3>English, Hindi, Marathi</h3><p>Chat in English, Hindi, Marathi or Hinglish. Crisis phrases are caught in all of them, in Devanagari too.</p></div>
+        <div class="feat"><div class="ic"><svg class="ico"><use href="#i-lock"/></svg></div><h3>Private by design</h3><p>No accounts and no chat logs. Messages go to the AI only to write a reply, and MindEase never stores them.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">How it works</span>
+        <h2>From message to response in five stages</h2>
+        <p>A deterministic safety layer wrapped around a language model. Open the chat and toggle <b>NLP pipeline</b> to watch each stage live.</p>
+      </div>
+      <div class="pipeline">
+        <div class="pstep"><div class="bar"></div><span class="n">01 / INPUT</span><h4>Capture</h4><p>Typed text or a quick-reply chip, normalised (contractions, casing, scripts).</p></div>
+        <div class="pstep"><div class="bar"></div><span class="n">02 / NLP</span><h4>Understand</h4><p>Tokenisation, lemmatisation, lexicon sentiment with negation handling, intent scoring.</p></div>
+        <div class="pstep crisis"><div class="bar"></div><span class="n">03 / SAFETY</span><h4>Crisis check</h4><p>Runs first, every time. A match overrides all other routes and surfaces helplines.</p></div>
+        <div class="pstep"><div class="bar"></div><span class="n">04 / MODEL</span><h4>Generate</h4><p>An LLM (Gemini Flash by default) writes the reply through a forced tool call: reply, intent, risk level and suggested actions as structured JSON.</p></div>
+        <div class="pstep"><div class="bar"></div><span class="n">05 / GUARD</span><h4>Validate</h4><p>The server whitelists actions, caps output, and attaches helplines when the model flags risk. Offline, local rules take over.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="tools">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Wellness toolkit</span>
+        <h2>Try a tool right now</h2>
+        <p>Short, structured exercises drawn from CBT and mindfulness practice. Each one is also available inside the chat.</p>
+      </div>
+      <div class="tools">
+        <div class="tool">
+          <h3>Guided breathing</h3>
+          <p class="sub">Slow, paced breathing calms the nervous system within a few cycles. Pick a pattern.</p>
+          <div class="patterns" id="homePatterns"></div>
+          <button class="btn btn-primary" id="homeBreathe" style="align-self:flex-start"><svg class="ico"><use href="#i-wind"/></svg>Start breathing</button>
+        </div>
+        <div class="tool">
+          <h3>Affirmations</h3>
+          <div class="affirm-card" id="affirmCard" aria-live="polite"></div>
+          <button class="btn btn-ghost btn-sm" id="affirmNext" style="align-self:flex-start">Show another</button>
+        </div>
+        <div class="tool journal">
+          <h3>Reflective journal</h3>
+          <div class="journal-prompt"><span id="jPrompt"></span><button id="jNew">New prompt</button></div>
+          <label for="jText" class="sub" style="font-size:13px">Your entry is saved only in this browser.</label>
+          <textarea id="jText" placeholder="Write freely. There's no wrong answer."></textarea>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" id="jSave"><svg class="ico"><use href="#i-book"/></svg>Save entry</button>
+            <span class="src" id="jHint"></span>
+          </div>
+          <div class="entries" id="jList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="results">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Evaluation</span>
+        <h2>What testing showed</h2>
+        <p>Results reported in the project's testing and validation chapter, including a user acceptance test with 50 participants (students, working professionals, and counselors).</p>
+      </div>
+      <div class="results">
+        <div class="tiles">
+          <div class="tile"><div class="v">430<small> ms</small></div><div class="l">Avg response time</div><div class="t">target &lt; 500 ms</div></div>
+          <div class="tile"><div class="v">96.4<small>%</small></div><div class="l">Intent and sentiment accuracy</div><div class="t">target ≥ 95%</div></div>
+          <div class="tile"><div class="v">93<small>%</small></div><div class="l">Overall satisfaction</div><div class="t">50-person UAT</div></div>
+          <div class="tile"><div class="v">100<small>%</small></div><div class="l">Crisis detection rate</div><div class="t">simulated scenarios</div></div>
+        </div>
+        <div class="ux">
+          <h3>User experience ratings</h3>
+          <div id="uxBars" style="display:flex;flex-direction:column;gap:12px"></div>
+          <div class="axis"><div></div><div><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div><div></div></div>
+          <p class="src">Average score out of 5. Privacy and trust rated highest.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="about">
+    <div class="wrap about">
+      <div>
+        <div class="sec-head" style="margin-bottom:20px">
+          <span class="eyebrow">About the project</span>
+          <h2>Closing the gap between needing help and asking for it</h2>
+        </div>
+        <p>Stigma, cost, and a shortage of trained professionals leave many people, especially young people, without support. MindEase explores how a carefully designed conversational agent can offer anonymous, always-available first-tier support grounded in CBT, while staying honest about its limits and handing off to humans when it matters.</p>
+        <p style="margin-top:14px">The original system was built with a Python and Django backend, NLTK and spaCy for language processing, and a web chat interface. This version upgrades the conversation layer to an LLM (Gemini Flash by default, swappable for any OpenAI-compatible provider), served from a serverless API, while keeping crisis detection as deterministic rules that run before the model, in the browser and again on the server.</p>
+        <div class="stack"><span>Gemini API</span><span>OpenAI-compatible API</span><span>Node.js</span><span>Vercel Functions</span><span>Tool use / JSON</span><span>HTML / CSS / JS</span><span>node:test</span></div>
+      </div>
+      <aside class="team">
+        <span class="eyebrow">Capstone project</span>
+        <dl>
+          <dt>Degree</dt><dd>B.Tech, Computer Science &amp; Engineering</dd>
+          <dt>Institute</dt><dd>Symbiosis Institute of Technology, Nagpur</dd>
+          <dt>Year</dt><dd>AY 2025–26</dd>
+          <dt>Team</dt><dd>Gauri Savale, Purva Thakare, Tanumay Chatterjee</dd>
+          <dt>Guide</dt><dd>Dr. Sandeep Kumar</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block alt" id="support">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Support</span>
+        <h2>Talk to a real person</h2>
+        <p>If you're struggling or thinking about hurting yourself, please reach out to someone now. These services are free and confidential.</p>
+      </div>
+      <div class="lines" id="helplines"></div>
+      <p class="disclaimer">MindEase is a student project and a supportive tool. It is not a medical device, cannot diagnose, and is not a substitute for professional care. In an emergency, call 112 in India or your local emergency number.</p>
+    </div>
+  </section>
+
+  <footer><div class="wrap"><span>MindEase · Mental health chatbot</span><span>AI replies · Safety rules run first</span></div></footer>
+</div>
+
+<!-- ======================= ASSESSMENT ======================= -->
+<div id="view-assess" hidden>
+  <header class="apphead"><div class="wrap">
+    <button class="back" data-back><svg class="ico"><use href="#i-back"/></svg>Back</button>
+    <div class="apptitle"><div><h2>Mental Health Assessment</h2><p>Understand your mental wellness</p></div></div>
+    <div class="head-actions"><a class="btn btn-ghost btn-sm" href="#chat"><svg class="ico"><use href="#i-msg"/></svg><span class="lbl">Chat Support</span></a></div>
+  </div></header>
+  <main class="assess-main"><div class="wrap narrow" id="assessRoot" style="max-width:900px"></div></main>
+</div>
+
+<!-- ======================= CHAT ======================= -->
+<div id="view-chat" hidden>
+  <header class="apphead"><div class="wrap">
+    <button class="back" data-back><svg class="ico"><use href="#i-back"/></svg><span class="lbl">Back</span></button>
+    <div class="apptitle"><span class="bot-av"><svg class="ico"><use href="#i-bot"/></svg></span><div><h2>MindEaseChat <span class="mode" id="modeBadge" title="Replies come from an AI model">AI</span></h2><p data-i18n="chatSub">Your wellness companion</p></div></div>
+    <div class="head-actions">
+      <button class="btn btn-ghost btn-sm" id="inspectBtn" aria-pressed="false"><svg class="ico"><use href="#i-activity"/></svg><span class="lbl">NLP pipeline</span></button>
+      <a class="btn btn-ghost btn-sm" href="#assess"><svg class="ico"><use href="#i-clip"/></svg><span class="lbl">Take Assessment</span></a>
+    </div>
+  </div></header>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-col">
+      <div class="msgs" id="msgs" aria-live="polite"><div class="wrap" id="msgList"></div></div>
+      <div class="quick"><div class="wrap"><p data-i18n="quickLbl">Quick responses:</p><div class="row" id="quickRow"></div></div></div>
+      <div class="composer"><div class="wrap" style="max-width:820px">
+        <form id="chatForm" autocomplete="off">
+          <input type="text" id="chatInput" placeholder="Type your message..." aria-label="Message" maxlength="600">
+          <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled><svg class="ico"><use href="#i-send"/></svg></button>
+        </form>
+        <div class="privacy-line"><svg class="ico"><use href="#i-lock"/></svg>Replies are AI-generated and nothing is stored. Not a substitute for professional help.</div>
+      </div></div>
+    </div>
+    <aside class="inspector" id="inspector" hidden>
+      <h3>NLP pipeline <button class="close-i" id="closeInspect">Close</button></h3>
+      <div id="inspectBody"><p class="i-empty">Send a message to see how MindEase processes it: tokens, sentiment, the crisis check, the route, and what the model returned.</p></div>
+    </aside>
+  </div>
+</div>
+
+<!-- breathing overlay -->
+<div class="overlay" id="breathOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="bTitle">
+  <div class="breath-card">
+    <h3 id="bTitle">Guided breathing</h3>
+    <div class="patterns" id="ovPatterns"></div>
+    <div class="circle-wrap"><div class="circle" id="bCircle"></div><div class="circle-txt" id="bTxt"><div>Ready<small></small></div></div></div>
+    <div class="breath-meta" id="bMeta">Press start and follow the circle</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary btn-sm" id="bStart">Start</button>
+      <button class="btn btn-ghost btn-sm" id="bClose">Done</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (v !== undefined && v !== null && v !== false) n.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(c));
+  return n;
+};
+const icon = id => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', 'ico'); const u = document.createElementNS('http://www.w3.org/2000/svg', 'use'); u.setAttribute('href', '#i-' + id); s.append(u); return s; };
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('mindease:' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('mindease:' + k, JSON.stringify(v)); } catch {} }
+};
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const now = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 1800); }
+function copyText(txt) {
+  try { navigator.clipboard.writeText(txt).then(() => toast('Copied ' + txt), () => toast('Select the number to copy it')); }
+  catch { toast('Select the number to copy it'); }
+}
+
+/* ---------------- theme ---------------- */
+$('#themeBtn').addEventListener('click', () => {
+  const r = document.documentElement;
+  const cur = r.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  r.dataset.theme = cur === 'dark' ? 'light' : 'dark';
+  store.set('theme', r.dataset.theme);
+});
+{ const t = store.get('theme'); if (t) document.documentElement.dataset.theme = t; }
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: { h1a: 'Your mental', h1b: 'wellness', h1c: 'companion.', tag: 'Safe • Supportive • Always Available',
+    desc: 'Connect with our AI companion for personalized mental health support, assessments, and guidance designed specifically for teens.',
+    startChat: 'Start Chatting', takeAssess: 'Take Assessment', chooseLang: 'Choose Your Language',
+    navFeatures: 'Features', navHow: 'How it works', navTools: 'Toolkit', navAbout: 'About', navSupport: 'Support',
+    chatSub: 'Your wellness companion', quickLbl: 'Quick responses:',
+    greet: "Hi there! I'm your mental wellness companion. I'm here to listen, support, and help you navigate your feelings. What's on your mind today?",
+    quick: ["I'm feeling anxious", "I'm stressed", "I can't sleep", 'I need help'] },
+  hi: { h1a: 'आपका मानसिक', h1b: 'स्वास्थ्य', h1c: 'साथी।', tag: 'सुरक्षित • सहायक • हमेशा उपलब्ध',
+    desc: 'व्यक्तिगत मानसिक स्वास्थ्य सहायता, आकलन और मार्गदर्शन के लिए हमारे AI साथी से जुड़ें, जो खास तौर पर किशोरों के लिए बनाया गया है।',
+    startChat: 'बातचीत शुरू करें', takeAssess: 'आकलन करें', chooseLang: 'अपनी भाषा चुनें',
+    navFeatures: 'विशेषताएँ', navHow: 'यह कैसे काम करता है', navTools: 'टूलकिट', navAbout: 'परिचय', navSupport: 'सहायता',
+    chatSub: 'आपका वेलनेस साथी', quickLbl: 'त्वरित जवाब:',
+    greet: 'नमस्ते! मैं आपका मानसिक स्वास्थ्य साथी हूँ। मैं सुनने, साथ देने और आपकी भावनाओं को समझने में मदद करने के लिए यहाँ हूँ। आज आपके मन में क्या है?',
+    quick: ['मुझे घबराहट हो रही है', 'मैं तनाव में हूँ', 'मुझे नींद नहीं आती', 'मुझे मदद चाहिए'] },
+  mr: { h1a: 'तुमचा मानसिक', h1b: 'आरोग्य', h1c: 'सोबती.', tag: 'सुरक्षित • आधार देणारा • नेहमी उपलब्ध',
+    desc: 'वैयक्तिक मानसिक आरोग्य आधार, मूल्यांकन आणि मार्गदर्शनासाठी आमच्या AI सोबत्याशी जोडा, जो खास किशोरांसाठी तयार केला आहे.',
+    startChat: 'गप्पा सुरू करा', takeAssess: 'मूल्यांकन करा', chooseLang: 'तुमची भाषा निवडा',
+    navFeatures: 'वैशिष्ट्ये', navHow: 'हे कसे काम करते', navTools: 'टूलकिट', navAbout: 'माहिती', navSupport: 'मदत',
+    chatSub: 'तुमचा वेलनेस सोबती', quickLbl: 'झटपट उत्तरे:',
+    greet: 'नमस्कार! मी तुमचा मानसिक आरोग्य सोबती आहे. मी ऐकण्यासाठी, आधार देण्यासाठी आणि तुमच्या भावना समजून घेण्यासाठी इथे आहे. आज तुमच्या मनात काय आहे?',
+    quick: ['मला चिंता वाटतेय', 'मी तणावात आहे', 'मला झोप येत नाही', 'मला मदत हवी आहे'] }
+};
+const QUICK_SEND = ["I'm feeling anxious", "I'm stressed", "I can't sleep", 'I need help'];
+let lang = store.get('lang', 'en');
+function applyLang(l) {
+  lang = I18N[l] ? l : 'en';
+  document.documentElement.lang = lang;
+  $$('[data-i18n]').forEach(n => { const v = I18N[lang][n.dataset.i18n]; if (v) n.textContent = v; });
+  $$('.lang-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  renderQuick();
+  store.set('lang', lang);
+}
+$$('.lang-btn').forEach(b => b.addEventListener('click', () => { applyLang(b.dataset.lang); if (chatStarted) resetChat(); }));
+
+/* ---------------- helplines ---------------- */
+const HELPLINES = [
+  { who: 'Tele-MANAS', where: 'India · Govt. of India · 24/7 · 20+ languages', num: '14416' },
+  { who: 'iCall (TISS)', where: 'India · Mon–Sat, 10am–8pm', num: '9152987821' },
+  { who: 'Emergency services', where: 'India · police, ambulance, fire', num: '112' },
+  { who: '988 Lifeline', where: 'United States · call or text · 24/7', num: '988' }
+];
+const hl = $('#helplines');
+HELPLINES.forEach(h => hl.append(el('div', { class: 'line' },
+  el('span', { class: 'who', text: h.who }), el('span', { class: 'where', text: h.where }),
+  el('div', { class: 'num-row' }, el('span', { class: 'num', text: h.num }), el('button', { class: 'copy', text: 'Copy', onclick: () => copyText(h.num) }))
+)));
+
+/* ---------------- UX bars ---------------- */
+const UX = [['Ease of use', 4.7], ['Response accuracy', 4.6], ['Empathy and tone', 4.8], ['Personalization', 4.5], ['Privacy and trust', 4.9]];
+const maxUx = Math.max(...UX.map(u => u[1]));
+UX.forEach(([l, v]) => {
+  const bar = el('div', { class: 'uxbar' }); const fill = el('i'); fill.style.width = (v / 5 * 100) + '%'; bar.append(fill);
+  $('#uxBars').append(el('div', { class: 'uxrow' + (v === maxUx ? ' top' : '') }, el('span', { text: l }), bar, el('b', { text: v.toFixed(1) })));
+});
+
+/* ---------------- affirmations + journal ---------------- */
+const AFFIRM = [
+  "I'm allowed to take up space and ask for help.",
+  'This feeling is temporary. I have gotten through hard days before.',
+  'I am more than my grades, my mistakes, or one bad day.',
+  "I don't have to have it all figured out today.",
+  'Small steps still move me forward.',
+  'I deserve the same kindness I give my friends.',
+  'My worth is not measured by my productivity.',
+  "It's okay to rest. Rest is part of the work.",
+  'I can feel anxious and still do brave things.',
+  'I am learning, and that is enough for now.'
+];
+let affI = Math.floor(Math.random() * AFFIRM.length);
+const nextAffirm = () => { affI = (affI + 1) % AFFIRM.length; return AFFIRM[affI]; };
+$('#affirmCard').textContent = AFFIRM[affI];
+$('#affirmNext').addEventListener('click', () => $('#affirmCard').textContent = nextAffirm());
+
+const PROMPTS = [
+  'What is one thing that went better than expected this week?',
+  "What's taking up the most space in your mind right now?",
+  'Describe a moment today when you felt calm, even briefly.',
+  'What would you tell a friend who felt the way you feel today?',
+  'Name three small things you are grateful for and why.',
+  'What is one worry you can let go of, and one you can act on?',
+  'What does a good day look like for you, realistically?'
+];
+let pI = 0;
+const setPrompt = () => { pI = (pI + 1) % PROMPTS.length; $('#jPrompt').textContent = PROMPTS[pI]; };
+setPrompt();
+$('#jNew').addEventListener('click', setPrompt);
+let entries = store.get('journal', []);
+function renderEntries() {
+  const list = $('#jList'); list.replaceChildren();
+  entries.slice().reverse().forEach(e => {
+    const lbl = e.s > 0.15 ? ['pos', 'leaning positive'] : e.s < -0.15 ? ['neg', 'leaning heavy'] : ['neu', 'neutral'];
+    list.append(el('div', { class: 'entry' },
+      el('div', { class: 'meta' }, el('span', { text: new Date(e.t).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }), el('span', { class: 'tone ' + lbl[0], text: 'tone: ' + lbl[1] })),
+      el('div', { text: e.text.length > 220 ? e.text.slice(0, 220) + '…' : e.text })));
+  });
+}
+renderEntries();
+$('#jSave').addEventListener('click', () => {
+  const text = $('#jText').value.trim();
+  if (!text) { $('#jHint').textContent = 'Write something first, even one line.'; return; }
+  const a = analyze(text);
+  entries.push({ t: Date.now(), text, s: a.sentiment.comparative, p: $('#jPrompt').textContent });
+  entries = entries.slice(-30);
+  store.set('journal', entries);
+  $('#jText').value = '';
+  $('#jHint').textContent = a.crisis ? 'Thank you for writing this. Please see the support numbers below, you deserve to talk to someone.' : 'Saved. Writing it down is a real step.';
+  renderEntries();
+});
+
+/* ---------------- breathing ---------------- */
+const PATTERNS = {
+  box: { name: 'Box 4-4-4-4', steps: [['Breathe in', 4, 1], ['Hold', 4, 1], ['Breathe out', 4, .45], ['Hold', 4, .45]] },
+  478: { name: '4-7-8 sleep', steps: [['Breathe in', 4, 1], ['Hold', 7, 1], ['Breathe out', 8, .45]] },
+  calm: { name: 'Calm 4-6', steps: [['Breathe in', 4, 1], ['Breathe out', 6, .45]] }
+};
+let pattern = 'box';
+function renderPatternChips(root) {
+  root.replaceChildren(...Object.entries(PATTERNS).map(([k, p]) =>
+    el('button', { class: 'chip', 'aria-pressed': String(k === pattern), text: p.name, onclick: () => { pattern = k; $$('.patterns').forEach(renderPatternChips); if (breath.running) startBreath(); } })));
+}
+$$('.patterns').forEach(renderPatternChips);
+const breath = { running: false, timer: null, cycle: 0 };
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setCircle(label, secs, scale, dur) {
+  const c = $('#bCircle');
+  c.style.transitionDuration = reduceMotion ? '0s' : dur + 's';
+  c.style.transform = `scale(${scale})`;
+  const t = $('#bTxt'); t.replaceChildren(el('div', {}, label, el('small', { text: secs })));
+}
+function startBreath() {
+  stopBreath(false);
+  breath.running = true; breath.cycle = 0;
+  $('#bStart').textContent = 'Restart';
+  const steps = PATTERNS[pattern].steps;
+  let si = 0, left = steps[0][1];
+  const enter = () => { const [l, s, sc] = steps[si]; left = s; setCircle(l, left, sc, s); };
+  enter();
+  $('#bMeta').textContent = 'Cycle 1 · ' + PATTERNS[pattern].name;
+  breath.timer = setInterval(() => {
+    left--;
+    if (left <= 0) {
+      si = (si + 1) % steps.length;
+      if (si === 0) { breath.cycle++; $('#bMeta').textContent = `Cycle ${breath.cycle + 1} · ${PATTERNS[pattern].name}`; }
+      enter();
+    } else { $('#bTxt small').textContent = left; }
+  }, 1000);
+}
+function stopBreath(reset = true) {
+  clearInterval(breath.timer); breath.running = false;
+  if (reset) { setCircle('Ready', '', .45, .6); $('#bStart').textContent = 'Start'; $('#bMeta').textContent = 'Press start and follow the circle'; }
+}
+function openBreath(p) {
+  if (p && PATTERNS[p]) { pattern = p; $$('.patterns').forEach(renderPatternChips); }
+  $('#breathOverlay').hidden = false; stopBreath(); $('#bStart').focus();
+}
+function closeBreath() {
+  const cycles = breath.cycle; stopBreath(); $('#breathOverlay').hidden = true;
+  if (currentView === 'chat' && cycles >= 1) botSay({ t: `Nice work, you did ${cycles} full cycle${cycles > 1 ? 's' : ''}. How does your body feel now compared to before?`, chips: [{ label: 'A bit calmer' , send: 'I feel a bit calmer' }, { label: 'Still tense', send: 'I still feel tense' }] });
+}
+$('#bStart').addEventListener('click', startBreath);
+$('#bClose').addEventListener('click', closeBreath);
+$('#homeBreathe').addEventListener('click', () => openBreath());
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#breathOverlay').hidden) closeBreath(); });
+
+/* ================= NLP ENGINE ================= */
+const LEX = {
+  good: 2, great: 3, happy: 3, better: 2, calm: 2, calmer: 2, relaxed: 2, proud: 2, excited: 3, grateful: 3, thankful: 2, love: 3, glad: 2, okay: 1, ok: 1, fine: 1,
+  hopeful: 2, peaceful: 2, fun: 2, enjoy: 2, amazing: 3, nice: 2, safe: 1, rested: 2, confident: 2, awesome: 3, wonderful: 3, relieved: 2, motivated: 2, thanks: 1, thank: 1,
+  sad: -2, depressed: -3, depression: -3, down: -1, low: -1, empty: -2, hopeless: -3, cry: -2, crying: -2, cried: -2, unhappy: -2, miserable: -3, numb: -2, worthless: -3,
+  anxious: -2, anxiety: -2, nervous: -2, panic: -3, panicking: -3, worried: -2, worry: -2, worrying: -2, scared: -2, afraid: -2, fear: -2, terrified: -3, overthinking: -2,
+  stress: -2, stressed: -2, stressful: -2, overwhelmed: -3, overwhelming: -3, pressure: -1, burnout: -3, exhausted: -2, tired: -1, tense: -2,
+  lonely: -2, alone: -1, isolated: -2, angry: -2, mad: -2, furious: -3, frustrated: -2, annoyed: -1, irritated: -1, hate: -3, hurt: -2, pain: -2,
+  bad: -2, terrible: -3, awful: -3, horrible: -3, fail: -2, failed: -2, failing: -2, failure: -3, useless: -3, stupid: -2, ugly: -2, guilty: -2, ashamed: -3,
+  broken: -2, lost: -2, confused: -1, struggling: -2, struggle: -2, sick: -2, nightmare: -2, nightmares: -2, insomnia: -2, die: -3, dead: -3, kill: -3, alone: -1, problem: -1, problems: -1,
+  'उदास': -2, 'तनाव': -2, 'चिंता': -2, 'डर': -2, 'अकेला': -2, 'अकेली': -2, 'खुश': 3, 'अच्छा': 2, 'काळजी': -2, 'एकटा': -2, 'एकटी': -2, 'आनंदी': 3, 'छान': 2, 'घबराहट': -2, 'तणाव': -2, 'चिंता': -2,
+  tension: -2, pareshan: -2, udaas: -2, khush: 3, akela: -2, dar: -1
+};
+const NEGATORS = new Set(['not', 'no', 'never', 'dont', 'doesnt', 'didnt', 'isnt', 'wasnt', 'arent', 'cant', 'cannot', 'wont', 'nahi', 'nahin', 'नहीं', 'नाही', 'hardly', 'without', 'nothing']);
+const STOP = new Set(['i', 'im', 'me', 'my', 'a', 'an', 'the', 'is', 'am', 'are', 'was', 'to', 'and', 'of', 'it', 'its', 'so', 'just', 'really', 'very', 'feel', 'feeling', 'that', 'this', 'in', 'on', 'for', 'with', 'be', 'have', 'been', 'do', 'about']);
+
+const INTENTS = {
+  greeting: { w: ['hi', 'hello', 'hey', 'hii', 'namaste', 'namaskar', 'yo', 'hola', 'नमस्ते', 'नमस्कार'], p: ['good morning', 'good evening', 'good afternoon'] },
+  anxiety: { w: ['anxious', 'anxiety', 'nervous', 'panic', 'panicking', 'worried', 'worry', 'worrying', 'scared', 'afraid', 'fear', 'overthinking', 'overthink', 'uneasy', 'terrified', 'ghabrahat', 'dar', 'घबराहट', 'चिंता', 'डर', 'काळजी'], p: ['racing heart', 'heart racing', 'cant breathe', 'what if', 'on edge', 'panic attack'] },
+  stress: { w: ['stress', 'stressed', 'stressful', 'overwhelmed', 'overwhelming', 'pressure', 'burnout', 'burnt', 'busy', 'deadline', 'deadlines', 'exhausted', 'tension', 'pareshan', 'तनाव', 'तणाव', 'tense'], p: ['too much', 'burned out', 'burnt out', 'so much to do'] },
+  sleep: { w: ['sleep', 'insomnia', 'awake', 'asleep', 'sleepless', 'night', 'nightmare', 'nightmares', 'neend', 'नींद', 'झोप'], p: ['cant sleep', 'fall asleep', 'stay asleep', 'wake up', 'up all night'] },
+  sad: { w: ['sad', 'depressed', 'depression', 'down', 'low', 'empty', 'hopeless', 'cry', 'crying', 'cried', 'unhappy', 'miserable', 'numb', 'udaas', 'उदास', 'dukhi'], p: ['feel nothing', 'no motivation', 'nothing feels', 'not happy', 'lost interest'] },
+  lonely: { w: ['lonely', 'alone', 'isolated', 'akela', 'अकेला', 'अकेली', 'एकटा', 'एकटी'], p: ['no friends', 'no one', 'nobody cares', 'left out', 'no one understands'] },
+  anger: { w: ['angry', 'anger', 'mad', 'furious', 'annoyed', 'frustrated', 'irritated', 'rage', 'hate', 'gussa'], p: ['pissed off', 'fed up'] },
+  academic: { w: ['exam', 'exams', 'test', 'tests', 'study', 'studying', 'grades', 'marks', 'college', 'school', 'assignment', 'assignments', 'results', 'semester', 'boards', 'jee', 'neet', 'homework', 'class'], p: [] },
+  relationship: { w: ['friend', 'friends', 'breakup', 'boyfriend', 'girlfriend', 'parents', 'parent', 'mom', 'dad', 'family', 'fight', 'argument', 'relationship', 'partner', 'crush', 'sibling'], p: ['broke up'] },
+  selfesteem: { w: ['ugly', 'stupid', 'useless', 'worthless', 'failure', 'loser', 'confidence', 'compare', 'comparing', 'insecure', 'hate myself'], p: ['not good enough', 'hate myself', 'im a failure', 'not enough'] },
+  help: { w: ['help', 'support', 'features', 'madad', 'मदद', 'मदत'], p: ['what can you do', 'how does this work', 'need help', 'need someone'] },
+  breathe: { w: ['breathe', 'breathing', 'breath', 'relax'], p: ['calm down', 'calm me', 'breathing exercise'] },
+  grounding: { w: ['grounding', 'ground', '54321'], p: ['5 4 3 2 1'] },
+  affirm: { w: ['affirmation', 'affirmations', 'motivate', 'motivation', 'quote', 'encourage'], p: ['say something nice', 'positive thought'] },
+  journal: { w: ['journal', 'journaling', 'diary'], p: ['write it down'] },
+  reframe: { w: ['reframe', 'reframing', 'cbt'], p: ['negative thought', 'challenge a thought', 'challenge this thought', 'thought record', 'negative thoughts'] },
+  prioritise: { w: ['prioritise', 'prioritize', 'priorities', 'plan', 'organise', 'organize', 'todo'], p: ['to do list', 'help me plan'] },
+  positive: { w: ['good', 'great', 'happy', 'better', 'calmer', 'fine', 'okay', 'excited', 'proud', 'awesome', 'amazing', 'relieved', 'khush', 'खुश', 'छान'], p: ['feel better', 'feeling better', 'doing well', 'bit calmer'] },
+  thanks: { w: ['thanks', 'thank', 'thx', 'ty', 'dhanyavad', 'shukriya', 'धन्यवाद'], p: [] },
+  bye: { w: ['bye', 'goodbye', 'goodnight', 'cya'], p: ['see you', 'talk later', 'good night'] }
+};
+const VOCAB = new Set([...Object.keys(LEX), ...Object.values(INTENTS).flatMap(i => i.w)]);
+
+const CRISIS = [
+  /\b(kill(ing)?\s+my\s?self|suicid\w*|end(ing)?\s+(it\s+all|my\s+life|everything)|want\s+to\s+die|wanna\s+die|wish\s+i\s+(was|were)\s+dead|better\s+off\s+dead|take\s+my\s+(own\s+)?life|hurt(ing)?\s+my\s?self|harm(ing)?\s+my\s?self|self[\s-]?harm\w*|cut(ting)?\s+my\s?self|no\s+reason\s+to\s+live|dont\s+want\s+to\s+(live|be\s+alive|exist|wake\s+up)|cant\s+go\s+on|overdos\w*|not\s+worth\s+living)\b/,
+  /(आत्महत्या|मरना\s*चाहत|मर\s*जाना\s*चाहत|जीना\s*नहीं\s*चाहत|खुद\s*को\s*(चोट|नुकसान)|मरायचं|मरायचे|जगायचं\s*नाही|जगायचे\s*नाही|marna\s+chaht|mar\s+jaana|jeena\s+nahi|khud\s+ko\s+(hurt|nuksan))/
+];
+
+function normalize(s) {
+  return s.toLowerCase().replace(/[’‘`]/g, "'")
+    .replace(/\bcan't\b/g, 'cant').replace(/\bwon't\b/g, 'wont').replace(/n't\b/g, 'nt').replace(/\bi'm\b/g, 'im').replace(/'/g, '')
+    .replace(/\s+/g, ' ').trim();
+}
+function lemma(w) {
+  if (VOCAB.has(w) || w.length < 5 || /[^\x00-\x7f]/.test(w)) return w;
+  let r = w;
+  if (r.endsWith('ies')) r = r.slice(0, -3) + 'y';
+  else if (r.endsWith('ing')) r = r.slice(0, -3);
+  else if (r.endsWith('ied')) r = r.slice(0, -3) + 'y';
+  else if (r.endsWith('ed')) r = r.slice(0, -2);
+  else if (r.endsWith('s') && !r.endsWith('ss') && !r.endsWith('us')) r = r.slice(0, -1);
+  return VOCAB.has(r) ? r : (VOCAB.has(r + 'e') ? r + 'e' : r);
+}
+function analyze(raw) {
+  const t0 = performance.now();
+  const norm = normalize(raw);
+  const tokens = norm.match(/[\p{L}\p{M}\p{N}]+/gu) || [];
+  const lemmas = tokens.map(lemma);
+  // sentiment with negation window of 3
+  let score = 0, hits = 0; const tokSent = [];
+  lemmas.forEach((w, i) => {
+    let v = LEX[w] ?? LEX[tokens[i]] ?? 0;
+    if (v) {
+      const neg = lemmas.slice(Math.max(0, i - 3), i).some(x => NEGATORS.has(x));
+      if (neg) v = -v * 0.6;
+      score += v; hits++;
+    }
+    tokSent.push(v);
+  });
+  const content = lemmas.filter(w => !STOP.has(w)).length || 1;
+  const comparative = Math.max(-1, Math.min(1, score / Math.max(3, content) * 1.2));
+  // intents
+  const padded = ' ' + tokens.join(' ') + ' ';
+  const scores = {}; const kw = new Set();
+  for (const [name, def] of Object.entries(INTENTS)) {
+    let s = 0;
+    lemmas.forEach((w, i) => { if (def.w.includes(w) || def.w.includes(tokens[i])) { s += 1; kw.add(i); } });
+    def.p.forEach(p => { if (padded.includes(' ' + p + ' ')) s += 2; });
+    if (s) scores[name] = s;
+  }
+  // context adjustments: negated positives aren't positive
+  if (scores.positive && comparative < -0.1) delete scores.positive;
+  if (scores.help && Object.keys(scores).length > 1) scores.help -= 0.5;
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ intent: k, score: v, conf: v / (total + 0.5) }));
+  const crisis = CRISIS.some(rx => rx.test(norm));
+  return { raw, norm, tokens, lemmas, tokSent, kw, sentiment: { score, comparative, hits }, ranked, crisis, ms: performance.now() - t0 };
+}
+
+/* thinking-trap detector for CBT thought records */
+function detectTraps(t) {
+  const n = ' ' + normalize(t) + ' '; const traps = [];
+  if (/\b(always|never|everything|nothing|completely|totally)\b/.test(n)) traps.push('All-or-nothing thinking');
+  if (/\b(everyone|everybody|nobody|no one|all of them)\b/.test(n)) traps.push('Overgeneralisation');
+  if (/\b(should|must|have to|ought)\b/.test(n)) traps.push('"Should" statements');
+  if (/\b(what if|going to fail|gonna fail|will fail|ruin|disaster|worst)\b/.test(n)) traps.push('Catastrophising');
+  if (/\bim (a |an |so )?(failure|loser|stupid|useless|idiot|worthless|ugly|disappointment)\b/.test(n)) traps.push('Labelling');
+  if (/\b(they think|she thinks|he thinks|everyone thinks|they hate|judging me)\b/.test(n)) traps.push('Mind reading');
+  return traps;
+}
+
+/* ================= RESPONSES ================= */
+const R = {
+  greeting: [
+    { t: "Hey{name}! Good to see you here. How are you feeling right now, honestly?", chips: [{ label: "I'm okay", send: "I'm okay" }, { label: 'Not great', send: "I'm not feeling great" }, { label: 'Pretty stressed', send: "I'm pretty stressed" }] },
+    { t: "Hi{name}. This is a safe space, and nothing you type here leaves your device. What's on your mind?" }
+  ],
+  anxiety: [
+    { t: "Anxiety can make everything feel urgent and loud. You're not alone in this. Let's slow your body down first: breathe in for 4, hold for 4, out for 4, hold for 4. Want me to guide you through it?", chips: [{ label: 'Guide my breathing', action: 'breathe:box' }, { label: 'Help me challenge the worry', action: 'reframe' }, { label: 'Take anxiety check', action: 'assess:anxiety' }] },
+    { t: "That on-edge feeling is really uncomfortable. One CBT trick: name the worry, then ask, \"What is the most likely outcome, not the worst one?\" What's the worry that keeps coming back?", chips: [{ label: 'Try grounding', send: 'grounding exercise' }, { label: 'Reframe it with me', action: 'reframe' }] }
+  ],
+  grounding: [
+    { t: "Let's try 5-4-3-2-1 grounding. Look around and name:\n\n5 things you can see\n4 things you can touch\n3 things you can hear\n2 things you can smell\n1 thing you can taste\n\nTake your time with each one. How do you feel after?", chips: [{ label: 'A bit calmer', send: 'I feel a bit calmer' }, { label: 'Still anxious', send: 'I still feel anxious' }] }
+  ],
+  stress: [
+    { t: "That sounds like a lot to carry at once. When everything feels urgent, it helps to shrink the list. What's one thing that has to happen today, and one thing that can wait?", chips: [{ label: 'Breathing break', action: 'breathe:calm' }, { label: 'Help me prioritise', send: 'help me prioritise' }, { label: 'Stress check', action: 'assess:stress' }] },
+    { t: "Stress is your body trying to help, it just turned the volume up too high. Try a quick reset: drop your shoulders, unclench your jaw, and take three slow breaths. What's been the biggest source of pressure lately?", chips: [{ label: 'Exams', send: 'exams are stressing me out' }, { label: 'Family', send: 'things with my family are stressful' }, { label: 'Everything', send: 'everything is too much' }] }
+  ],
+  prioritise: [
+    { t: "Try this: write everything down, then sort it into three boxes.\n\nMust do today\nCan do this week\nCan let go of\n\nPick the smallest item in the first box and start there. Small wins build momentum. What's in your 'must do today' box?" }
+  ],
+  sleep: [
+    { t: "Not being able to sleep is exhausting, and the frustration can keep you awake even longer. Tonight, try: screens off 30 minutes before bed, a cool dark room, and if you're awake for 20 minutes, get up and do something calm until you feel sleepy. Is it harder to fall asleep, or to stay asleep?", chips: [{ label: 'Falling asleep', send: 'it is hard to fall asleep, my mind races' }, { label: 'I wake up a lot', send: 'I keep waking up at night' }, { label: 'Sleep check', action: 'assess:insomnia' }] },
+    { t: "When your mind races at night, try a \"worry dump\": write down everything on your mind before bed so your brain knows it's saved somewhere. The 4-7-8 breath can also help your body switch into rest mode. Want to try it now?", chips: [{ label: '4-7-8 breathing', action: 'breathe:478' }, { label: 'Open journal', action: 'journal' }] }
+  ],
+  sad: [
+    { t: "I'm really sorry you're feeling this way. Feeling low can make everything heavier, and it's okay to not be okay. Can you tell me a bit about what's been happening?", chips: [{ label: 'Nothing feels fun', send: 'nothing feels fun anymore' }, { label: 'I feel empty', send: 'I just feel empty' }, { label: 'Mood check', action: 'assess:depression' }] },
+    { t: "Thank you for telling me. When we feel down, our thoughts can get harsh. One small step that really helps: do one tiny thing that used to feel good, like a short walk, a song you love, or texting a friend. What's one small thing you could try today?", chips: [{ label: 'Give me an affirmation', action: 'affirm' }, { label: 'Challenge a negative thought', action: 'reframe' }] }
+  ],
+  lonely: [
+    { t: "Feeling lonely hurts, and it doesn't mean something is wrong with you. Lots of people feel this way, even when surrounded by others. Is there one person you could send a short message to today, even just \"hey, thinking of you\"?" },
+    { t: "I'm glad you reached out here. Connection can start small: a club, a study group, or an online community around something you like. What's something you enjoy that others might too?" }
+  ],
+  anger: [
+    { t: "It sounds like something really got to you, and anger is a valid feeling. Before reacting, try pausing: step away, take five slow breaths, and let the first wave pass. What happened?", chips: [{ label: 'Breathing break', action: 'breathe:calm' }] },
+    { t: "Anger often sits on top of other feelings, like hurt or feeling unheard. Once you've cooled down a little, try naming what's underneath. Do you think something else is behind it?" }
+  ],
+  academic: [
+    { t: "Exams can feel like everything rides on them, but one test doesn't define you. Try the Pomodoro method: 25 minutes of focus, 5 minutes of break, repeat. And sleep is part of studying, your brain stores what you learned overnight. Which subject is worrying you most?", chips: [{ label: 'Help me plan', send: 'help me prioritise' }, { label: 'Breathing break', action: 'breathe:box' }] },
+    { t: "That pressure is real. If you notice thoughts like \"I'm going to fail\", ask yourself: what evidence do I actually have? How have I handled hard things before? Want to work through that thought together?", chips: [{ label: "Yes, let's reframe it", action: 'reframe' }] }
+  ],
+  relationship: [
+    { t: "Relationships can affect us so deeply, especially with people we care about. It's okay to feel hurt or confused. Do you want to tell me what happened?" },
+    { t: "When there's conflict, \"I\" statements can help: \"I felt hurt when...\" instead of \"You always...\". It keeps the conversation open instead of defensive. Is this with a friend, family, or a partner?", chips: [{ label: 'A friend', send: 'it is with a friend' }, { label: 'Family', send: 'it is with my family' }, { label: 'A partner', send: 'it is with my partner' }] }
+  ],
+  selfesteem: [
+    { t: "It sounds like you're being really hard on yourself. Would you talk to a close friend the way you're talking to yourself right now? Try writing down three things you've done well recently, however small.", chips: [{ label: 'Give me an affirmation', action: 'affirm' }, { label: 'Challenge this thought', action: 'reframe' }] },
+    { t: "Comparing ourselves to others is something almost everyone does, especially online. But you're seeing their highlights, not their whole story. What's one thing you genuinely like about yourself?" }
+  ],
+  help: [
+    { t: "I'm here for you{name}. Here's what I can do:\n\nListen whenever you want to talk\nGuide you through breathing and grounding\nHelp you challenge negative thoughts with CBT\nRun quick self-check assessments\n\nIf you're ever in danger or thinking about hurting yourself, I'll connect you with people who can help right away. What feels most useful right now?", chips: [{ label: 'Just listen', send: 'I just want to talk' }, { label: 'Breathing exercise', action: 'breathe:box' }, { label: 'Challenge a thought', action: 'reframe' }, { label: 'Take an assessment', action: 'assess' }] }
+  ],
+  talk: [{ t: "Of course. I'm listening, take all the time you need. What's been on your mind?" }],
+  breathe: [{ t: "Let's do it together. Follow the circle: breathe in as it grows, out as it shrinks. Press Done whenever you're ready.", action: 'breathe' }],
+  affirm: [{ t: 'Here is one for you:\n\n"{affirm}"\n\nTry saying it slowly, twice.', chips: [{ label: 'Another one', action: 'affirm' }, { label: 'Thanks', send: 'thanks' }] }],
+  journal: [{ t: 'Journaling helps untangle thoughts. Here is a prompt:\n\n"{prompt}"\n\nYou can answer here, or open the journal to save it on your device.', chips: [{ label: 'Open journal', action: 'journal' }] }],
+  positive: [
+    { t: "That's really good to hear{name}! What's been going well? Noticing good moments actually helps your brain remember them.", chips: [{ label: 'Save it in my journal', action: 'journal' }] },
+    { t: 'Love that. Holding on to the good days helps on the harder ones. Anything you want to talk through while you have the headspace?' }
+  ],
+  thanks: [{ t: "Anytime{name}. I'm here whenever you need to talk. Take care of yourself." }],
+  bye: [{ t: 'Take care{name}. Remember, small steps count, and reaching out is a strength. Come back anytime.' }],
+  fbNeg: [
+    { t: "That sounds really hard. I'm listening. Can you tell me more about how it's been affecting you?" },
+    { t: "Thank you for sharing that with me. It makes sense that you'd feel this way. Would it help more to talk it through, or to try a calming exercise?", chips: [{ label: 'Talk it through', send: 'I want to talk it through' }, { label: 'Calming exercise', action: 'breathe:calm' }] }
+  ],
+  fbNeu: [
+    { t: "I hear you. Tell me a bit more, what's been on your mind lately?" },
+    { t: "I'm here and listening. How has that been making you feel?" }
+  ],
+  fbPos: [{ t: "That sounds nice! Tell me more about it." }]
+};
+const rot = {};
+function respond(key) { const arr = R[key]; rot[key] = ((rot[key] ?? -1) + 1) % arr.length; return arr[rot[key]]; }
+
+/* ================= CHAT ================= */
+const memory = { name: null, turns: 0, lastIntent: null, moodTrail: [], flow: null, crisisShown: false };
+let chatStarted = false, busy = false;
+const msgList = $('#msgList'), msgs = $('#msgs');
+const scrollDown = () => requestAnimationFrame(() => msgs.scrollTop = msgs.scrollHeight);
+
+function renderQuick() {
+  const row = $('#quickRow'); row.replaceChildren();
+  I18N[lang].quick.forEach((l, i) => row.append(el('button', { class: 'chip', text: l, onclick: () => userSend(lang === 'en' ? QUICK_SEND[i] : l, l) })));
+}
+function bubble(role, content, extraClass = '') {
+  const b = el('div', { class: 'bubble' });
+  if (typeof content === 'string') b.append(el('div', { class: 'txt', text: content })); else b.append(content);
+  b.append(el('div', { class: 'time', text: now() }));
+  const m = el('div', { class: `msg ${role} ${extraClass}` });
+  if (role === 'bot') m.append(el('span', { class: 'av' }, icon(extraClass.includes('crisis') ? 'heart' : 'bot')));
+  m.append(b);
+  msgList.append(m); scrollDown();
+  return b;
+}
+function chipRow(chips) {
+  return el('div', { class: 'chips' }, chips.map(c => el('button', { class: 'chip', text: c.label, onclick: () => c.action ? doAction(c.action) : userSend(c.send, c.label) })));
+}
+function fill(t) {
+  return t.replace('{name}', memory.name ? ', ' + memory.name : '')
+    .replace('{affirm}', nextAffirm()).replace('{prompt}', PROMPTS[(pI = (pI + 1) % PROMPTS.length)]);
+}
+const history = [];
+function botSay(r, opts = {}) {
+  const txt = opts.raw ? r.t : fill(r.t);
+  history.push({ role: 'assistant', content: txt });
+  const content = el('div', {}, el('div', { class: 'txt', text: txt }));
+  if (r.extra) content.append(r.extra);
+  if (r.chips) content.append(chipRow(r.chips));
+  bubble('bot', content, opts.cls || '');
+  if (r.action) doAction(r.action, true);
+}
+function typingThen(fn, len = 80) {
+  busy = true; $('#sendBtn').disabled = true;
+  const m = el('div', { class: 'msg bot' }, el('span', { class: 'av' }, icon('bot')), el('div', { class: 'bubble' }, el('div', { class: 'typing' }, el('i'), el('i'), el('i'))));
+  msgList.append(m); scrollDown();
+  setTimeout(() => { m.remove(); busy = false; $('#sendBtn').disabled = !$('#chatInput').value.trim(); fn(); }, Math.min(500 + len * 9, 1500));
+}
+function doAction(a, silent) {
+  const [k, arg] = a.split(':');
+  if (k === 'breathe') { openBreath(arg); if (!silent) userEcho('Start a breathing exercise'); }
+  else if (k === 'affirm') { if (!silent) userEcho('Give me an affirmation'); typingThen(() => botSay(respond('affirm'))); }
+  else if (k === 'journal') { location.hash = 'tools'; setTimeout(() => $('#jText').focus(), 300); }
+  else if (k === 'reframe') { if (!silent) userEcho('Help me challenge a thought'); startReframe(); }
+  else if (k === 'assess') { location.hash = 'assess'; if (arg) setTimeout(() => startAssessment(arg), 0); }
+}
+function userEcho(label) { bubble('user', label); }
+
+function resetChat() {
+  msgList.replaceChildren(); history.length = 0; Object.assign(memory, { turns: 0, lastIntent: null, moodTrail: [], flow: null, crisisShown: false });
+  chatStarted = true;
+  botSay({ t: I18N[lang].greet });
+}
+
+/* ---------- CBT thought record flow ---------- */
+const FLOW_STEPS = [
+  { key: 'thought', ask: "Let's work through it with a CBT thought record. First, write down the thought that's bothering you, exactly as it sounds in your head.\n\n(Type \"stop\" anytime to leave this exercise.)" },
+  { key: 'before', ask: 'Got it. On a scale of 0 to 100, how strongly do you believe that thought right now?', num: true },
+  { key: 'for', ask: 'Thanks. What evidence supports this thought? Stick to facts, not feelings.' },
+  { key: 'against', ask: "Now the other side. What evidence doesn't fit this thought? Think of times it wasn't true, or what a friend might point out." },
+  { key: 'balanced', ask: 'Looking at both sides, what is a more balanced or helpful way to see the situation?' },
+  { key: 'after', ask: 'Last step. Reading that balanced thought, how strongly do you believe the original thought now, from 0 to 100?', num: true }
+];
+function startReframe() {
+  memory.flow = { type: 'reframe', step: 0, data: {} };
+  typingThen(() => botSay({ t: FLOW_STEPS[0].ask }));
+}
+function flowInput(text) {
+  const f = memory.flow; const step = FLOW_STEPS[f.step];
+  if (/^\s*(stop|cancel|exit|quit)\s*$/i.test(text)) { memory.flow = null; return typingThen(() => botSay({ t: "No problem, we can stop here. That took effort. What would you like to do now?", chips: [{ label: 'Just talk', send: 'I just want to talk' }, { label: 'Breathing exercise', action: 'breathe:box' }] })); }
+  if (step.num) {
+    const n = parseInt((text.match(/\d+/) || [])[0], 10);
+    if (isNaN(n) || n < 0 || n > 100) return typingThen(() => botSay({ t: 'Could you give me a number from 0 to 100? 0 means not at all, 100 means completely.' }));
+    f.data[step.key] = n;
+  } else f.data[step.key] = text;
+  f.step++;
+  if (f.step === 1) {
+    const traps = detectTraps(f.data.thought);
+    if (traps.length) return typingThen(() => botSay({ t: FLOW_STEPS[1].ask, extra: el('div', {}, ...traps.map(t => el('span', { class: 'trap', text: 'Possible thinking trap: ' + t }), ' ')) }));
+  }
+  if (f.step < FLOW_STEPS.length) return typingThen(() => botSay({ t: FLOW_STEPS[f.step].ask }));
+  // summary
+  const d = f.data; memory.flow = null;
+  const drop = d.before - d.after;
+  const rec = el('dl', { class: 'record' },
+    el('dt', { text: 'Thought' }), el('dd', { text: d.thought }),
+    el('dt', { text: 'For' }), el('dd', { text: d.for }),
+    el('dt', { text: 'Against' }), el('dd', { text: d.against }),
+    el('dt', { text: 'Balanced' }), el('dd', { text: d.balanced }),
+    el('dt', { text: 'Belief' }), el('dd', { text: `${d.before} → ${d.after}` }));
+  const msg = drop > 0 ? `Your belief in that thought dropped by ${drop} points. That shift matters, and you did it yourself.`
+    : "Your belief didn't shift much, and that's okay. Some thoughts take a few rounds, and noticing them is already a skill.";
+  typingThen(() => botSay({ t: "Here's your thought record:", extra: el('div', {}, rec, el('p', { style: 'margin-top:10px', text: msg })), chips: [{ label: 'Save to journal', send: '__savethought' }, { label: 'Do another', action: 'reframe' }] }));
+  memory.lastRecord = d;
+}
+
+/* ---------- crisis ---------- */
+function helpList() {
+  return el('div', { class: 'helplist' }, HELPLINES.map(h => el('div', { class: 'help-item' },
+    el('div', {}, el('b', { text: h.who }), el('small', { text: h.where })),
+    el('div', { style: 'display:flex;gap:8px;align-items:center' }, el('span', { class: 'hn', text: h.num }), el('button', { class: 'copy', text: 'Copy', onclick: () => copyText(h.num) })))));
+}
+function crisisReply() {
+  const list = helpList();
+  botSay({
+    t: "I'm really glad you told me, and I'm so sorry you're carrying this. You deserve support from a real person right now. Please reach out to one of these, they're free and confidential:",
+    extra: el('div', {}, list, el('p', { style: 'margin-top:10px', text: "If you're in immediate danger, call 112 (India) or your local emergency number, or go to the nearest hospital. I'm still here, and we can keep talking while you reach out." })),
+    chips: [{ label: 'Help me calm down right now', action: 'breathe:calm' }, { label: 'Keep talking', send: 'I want to keep talking' }]
+  }, { cls: 'crisis' });
+  memory.crisisShown = true;
+}
+
+/* ---------- main turn ---------- */
+let lastAnalysis = null;
+function userSend(text, label) {
+  text = (text || '').trim(); if (!text || busy) return;
+  if (text === '__savethought') {
+    const d = memory.lastRecord; if (!d) return;
+    bubble('user', label || 'Save to journal');
+    entries.push({ t: Date.now(), text: `Thought record: "${d.thought}" → "${d.balanced}" (belief ${d.before} → ${d.after})`, s: analyze(d.balanced).sentiment.comparative });
+    store.set('journal', entries); renderEntries();
+    return typingThen(() => botSay({ t: 'Saved to your journal on this device. You can find it in the Toolkit section of the home page.' }));
+  }
+  bubble('user', label || text);
+  history.push({ role: 'user', content: text });
+  $('#chatInput').value = ''; $('#sendBtn').disabled = true;
+  memory.turns++;
+  const a = analyze(text); lastAnalysis = a;
+  memory.moodTrail.push(+a.sentiment.comparative.toFixed(2)); memory.moodTrail = memory.moodTrail.slice(-8);
+  const nm = text.match(/\b(?:my name is|i'?m called|call me)\s+([A-Za-zऀ-ॿ]{2,20})/i);
+  if (nm) memory.name = nm[1][0].toUpperCase() + nm[1].slice(1);
+
+  let route;
+  if (a.crisis) { route = 'crisis'; memory.flow = null; }
+  else if (memory.flow) route = 'flow';
+  else route = null;
+
+  let key = null;
+  if (!route) {
+    const top = a.ranked[0];
+    if (nm && !top) key = 'greeting';
+    else if (/\b(just (want|wanna) to talk|keep talking|talk it through|listen)\b/.test(a.norm)) key = 'talk';
+    else if (top) key = top.intent;
+    else if (memory.lastIntent && R[memory.lastIntent] && a.sentiment.comparative < -0.05 && memory.turns > 1) key = 'fbNeg';
+    else key = a.sentiment.comparative < -0.1 ? 'fbNeg' : a.sentiment.comparative > 0.15 ? 'fbPos' : 'fbNeu';
+    route = ['reframe', 'breathe', 'affirm', 'journal'].includes(key) ? 'cbt' : 'llm';
+  }
+  a.route = route; a.key = key;
+  renderInspector();
+
+  if (route === 'crisis') return typingThen(crisisReply, 40);
+  if (route === 'flow') return flowInput(text);
+  if (key === 'reframe') return startReframe();
+  memory.lastIntent = key.startsWith('fb') ? memory.lastIntent : key;
+  if (route === 'llm') return askModel(a, key);
+  const r = respond(key);
+  typingThen(() => botSay(r), r.t.length);
+}
+
+/* ---------- model call (server: /api/chat) with offline fallback ---------- */
+function setMode(on, model) {
+  const b = $('#modeBadge');
+  b.classList.toggle('off', !on);
+  b.textContent = on ? 'AI' : 'Offline';
+  b.title = on ? 'Replies from ' + (model || 'the AI model') : 'AI unavailable: using built-in rules';
+}
+function showTyping() {
+  busy = true; $('#sendBtn').disabled = true;
+  const m = el('div', { class: 'msg bot' }, el('span', { class: 'av' }, icon('bot')), el('div', { class: 'bubble' }, el('div', { class: 'typing' }, el('i'), el('i'), el('i'))));
+  msgList.append(m); scrollDown();
+  return () => { m.remove(); busy = false; $('#sendBtn').disabled = !$('#chatInput').value.trim(); };
+}
+async function askModel(a, key) {
+  const stop = showTyping();
+  const t0 = performance.now();
+  try {
+    const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 20000);
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({ lang, messages: history.slice(-16) }) });
+    clearTimeout(to);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || 'HTTP ' + res.status), { status: res.status });
+    stop();
+    a.llm = { ...data, rtt: performance.now() - t0 };
+    if (a === lastAnalysis) renderInspector();
+    if (data.type === 'crisis') { a.route = 'crisis'; renderInspector(); return crisisReply(); }
+    setMode(true, data.model);
+    const flagged = data.helplines && data.helplines.length;
+    botSay({ t: data.reply, chips: data.suggestions && data.suggestions.length ? data.suggestions : null,
+      extra: flagged ? el('div', {}, el('p', { style: 'margin-top:10px;font-weight:600', text: 'If things feel like too much, please talk to someone now:' }), helpList()) : null },
+      { raw: true, cls: data.type === 'crisis-soft' ? 'crisis' : '' });
+  } catch (e) {
+    stop();
+    if (e.status === 429) { a.llm = { source: 'rate-limited', error: e.message }; renderInspector(); return botSay({ t: e.message }, { raw: true }); }
+    setMode(false);
+    a.llm = { source: 'offline', error: e.name === 'AbortError' ? 'timed out' : e.message, rtt: performance.now() - t0 };
+    a.route = 'support';
+    if (a === lastAnalysis) renderInspector();
+    botSay(respond(key));
+  }
+}
+
+$('#chatInput').addEventListener('input', e => $('#sendBtn').disabled = busy || !e.target.value.trim());
+$('#chatForm').addEventListener('submit', e => { e.preventDefault(); userSend($('#chatInput').value); });
+
+/* ---------- inspector ---------- */
+function setInspect(on) {
+  $('#inspector').hidden = !on; $('#chatBody').classList.toggle('inspect', on);
+  $('#inspectBtn').setAttribute('aria-pressed', String(on)); store.set('inspect', on);
+}
+$('#inspectBtn').addEventListener('click', () => setInspect($('#inspector').hidden));
+$('#closeInspect').addEventListener('click', () => setInspect(false));
+function renderInspector() {
+  const a = lastAnalysis; if (!a) return;
+  const root = $('#inspectBody'); root.replaceChildren();
+  const sec = (label, right, ...kids) => el('div', { class: 'i-sec' }, el('div', { class: 'i-lbl' }, label, right ? el('span', { text: right }) : null), ...kids);
+  const toks = el('div', { class: 'toks' }, a.tokens.map((t, i) => {
+    const s = a.tokSent[i]; const lm = a.lemmas[i];
+    return el('span', { class: 'tok' + (s > 0 ? ' s-pos' : s < 0 ? ' s-neg' : '') + (a.kw.has(i) ? ' kw' : ''), title: lm !== t ? 'lemma: ' + lm : '', text: lm !== t ? `${t}→${lm}` : t });
+  }));
+  root.append(sec('1 · Tokens + lemmas', a.tokens.length + ' tokens', toks, el('div', { class: 'src', style: 'font-size:12px', text: 'Green/red: sentiment words. Outlined: intent keywords.' })));
+  const c = a.sentiment.comparative; const mark = el('i'); mark.style.left = ((c + 1) / 2 * 100) + '%';
+  root.append(sec('2 · Sentiment', (c >= 0 ? '+' : '') + c.toFixed(2), el('div', { class: 'sent-scale' }, mark), el('div', { class: 'sent-ticks' }, el('span', { text: '−1 negative' }), el('span', { text: '0' }), el('span', { text: 'positive +1' }))));
+  const flag = a.crisis ? el('span', { class: 'flag hit' }, icon('alert'), 'FLAGGED: override all routes') : el('span', { class: 'flag pass' }, 'PASS: no risk phrases');
+  root.append(sec('3 · Crisis check', 'runs first', flag));
+  const bars = a.ranked.length ? a.ranked.slice(0, 4).map(r => { const t = el('div', { class: 't' }); const f = el('i'); f.style.width = (r.conf * 100) + '%'; t.append(f); return el('div', { class: 'ibar' }, el('span', { text: r.intent }), t, el('b', { text: Math.round(r.conf * 100) + '%' })); })
+    : [el('p', { class: 'i-empty', style: 'font-size:13px', text: 'No intent keywords matched. Falling back to sentiment-based reflection.' })];
+  root.append(sec('4 · Local intent router', a.ranked[0] ? 'top: ' + a.ranked[0].intent : 'none', ...bars));
+  const routes = [['llm', 'LLM'], ['support', 'RULES'], ['cbt', 'CBT TOOL'], ['flow', 'THOUGHT RECORD'], ['crisis', 'CRISIS']];
+  root.append(sec('5 · Decision engine', a.key ? 'reply: ' + a.key : '', el('div', { class: 'route' }, routes.map(([k, l]) => el('span', { class: (a.route === k ? 'on' : '') + (k === 'crisis' && a.route === k ? ' crit' : ''), text: l })))));
+  if (a.route === 'llm' || a.llm) {
+    const L = a.llm;
+    let body;
+    if (!L) body = [el('p', { class: 'i-empty', style: 'font-size:13px', text: 'Waiting for the model…' })];
+    else if (L.source === 'llm') body = [
+      el('div', { class: 'route' }, el('span', { class: 'risk ' + L.risk_level, text: 'risk: ' + L.risk_level }), el('span', { text: 'intent: ' + L.intent })),
+      el('div', { class: 'mem', text: `model: ${L.model}\nserver latency: ${L.latency_ms} ms\nround trip: ${Math.round(L.rtt)} ms` + (L.usage ? `\ntokens: ${L.usage.input} in / ${L.usage.output} out` : '') + `\nsuggestions: ${(L.suggestions || []).length}` })];
+    else if (L.source === 'rules') body = [el('span', { class: 'flag hit', text: 'Server safety layer: crisis, model skipped' })];
+    else body = [el('div', { class: 'mem', text: `model unavailable (${L.error})\nfell back to local rules` })];
+    root.append(sec('6 · Model output', L && L.source === 'llm' ? L.model : '', ...body));
+  }
+  root.append(sec('Session memory', a.ms.toFixed(2) + ' ms', el('div', { class: 'mem', text:
+    `turns: ${memory.turns}\nname: ${memory.name ?? '–'}\nlast intent: ${memory.lastIntent ?? '–'}\nmood trail: [${memory.moodTrail.join(', ')}]\nactive flow: ${memory.flow ? 'thought record, step ' + (memory.flow.step + 1) + '/6' : 'none'}` })));
+}
+
+/* ================= ASSESSMENTS ================= */
+const FREQ = ['Not at all', 'Several days', 'More than half the days', 'Nearly every day'];
+const ASSESS = {
+  anxiety: { name: 'Anxiety', icon: 'waves', blurb: 'Feeling worried or scared a lot, even about small things.', tool: 'GAD-7', stem: 'Over the last 2 weeks, how often have you been bothered by:',
+    q: ['Feeling nervous, anxious, or on edge', 'Not being able to stop or control worrying', 'Worrying too much about different things', 'Trouble relaxing', "Being so restless that it's hard to sit still", 'Becoming easily annoyed or irritable', 'Feeling afraid, as if something awful might happen'],
+    bands: [[4, 'minimal'], [9, 'mild'], [14, 'moderate'], [21, 'severe']],
+    tips: [['Box breathing', 'Four counts in, hold, out, hold. A few rounds signal safety to your nervous system.', 'breathe:box'], ['Schedule worry time', 'Give worries a 15-minute slot each day. When one pops up outside it, note it for later.', 'chat:I keep overthinking'], ['Ground yourself', 'The 5-4-3-2-1 technique pulls attention out of "what if" and back into the present.', 'chat:grounding exercise']] },
+  depression: { name: 'Depression', icon: 'heart', blurb: 'Feeling sad, hopeless, or losing interest in things you once loved.', tool: 'PHQ-9', stem: 'Over the last 2 weeks, how often have you been bothered by:',
+    q: ['Little interest or pleasure in doing things', 'Feeling down, depressed, or hopeless', 'Trouble falling or staying asleep, or sleeping too much', 'Feeling tired or having little energy', 'Poor appetite or overeating', 'Feeling bad about yourself, or that you are a failure or have let yourself or your family down', 'Trouble concentrating on things, such as reading or watching television', 'Moving or speaking so slowly that other people could have noticed, or being so fidgety or restless that you move around a lot more than usual', 'Thoughts that you would be better off dead, or of hurting yourself in some way'],
+    bands: [[4, 'minimal'], [9, 'mild'], [14, 'moderate'], [27, 'severe']],
+    tips: [['Celebrate small wins', 'Made your bed? Drank water? Acknowledging small victories can lift mood and motivation.', 'chat:give me an affirmation'], ['Get creative', 'Drawing, writing, or playing music gives emotions somewhere to go.', 'journal'], ['Challenge harsh thoughts', 'A CBT thought record helps you test the thoughts that keep you down.', 'reframe']] },
+  stress: { name: 'Stress & Burnout', icon: 'zap', blurb: 'Feeling overwhelmed and exhausted from too much pressure or demands.', tool: 'Stress screener', stem: 'Over the last 2 weeks, how often have you experienced:',
+    q: ['Feeling overwhelmed by your responsibilities', 'Finding it hard to switch off from work or study', 'Feeling exhausted even after rest', 'Getting irritable under pressure', 'Feeling you have no control over things that matter', 'Dropping things you enjoy because of demands'],
+    bands: [[4, 'minimal'], [8, 'mild'], [12, 'moderate'], [18, 'severe']],
+    tips: [['Shrink the list', 'Sort tasks into today, this week, and let go. Start with the smallest "today" task.', 'chat:help me prioritise'], ['Take real breaks', 'A 5-minute break every 25 minutes keeps focus higher than pushing through.', 'breathe:calm'], ['Protect one joy', 'Keep one thing you enjoy on the calendar, even during busy weeks.', 'chat:I am stressed']] },
+  insomnia: { name: 'Insomnia', icon: 'moon', blurb: 'Trouble falling asleep, staying asleep, or getting restful sleep.', tool: 'Sleep screener', stem: 'Over the last 2 weeks, how often have you had:',
+    q: ['Difficulty falling asleep', 'Waking up during the night and struggling to get back to sleep', 'Waking up too early', 'Feeling unrefreshed after sleep', 'Daytime tiredness that affects school, work, or mood', 'Worrying about whether you will sleep'],
+    bands: [[4, 'minimal'], [8, 'mild'], [12, 'moderate'], [18, 'severe']],
+    tips: [['4-7-8 breathing', 'A long exhale helps your body shift into rest mode. Try four rounds in bed.', 'breathe:478'], ['Worry dump', 'Write down everything on your mind before bed so your brain can let go of it.', 'journal'], ['Keep a rhythm', 'Wake at the same time every day, even weekends. It anchors your sleep clock.', 'chat:I cannot sleep']] },
+  ocd: { name: 'OCD', icon: 'clock', blurb: 'Having unwanted thoughts (obsessions) and repetitive behaviors (compulsions).', tool: 'OCD screener', stem: 'Over the last 2 weeks, how often have you experienced:',
+    q: ['Unwanted, intrusive thoughts that are hard to get rid of', 'Feeling driven to repeat actions like checking, washing, or counting', 'Strong distress if you cannot complete a ritual', 'Spending a lot of time on these thoughts or rituals', 'Avoiding places or things that trigger these thoughts', 'Needing things to feel "just right" before you can move on'],
+    bands: [[4, 'minimal'], [8, 'mild'], [12, 'moderate'], [18, 'severe']],
+    tips: [['Label the thought', 'Notice it as "an intrusive thought", not a fact or a command. Thoughts are not actions.', 'chat:I keep overthinking'], ['Delay the ritual', 'Try waiting a few minutes before a compulsion. Anxiety often peaks and falls on its own.', 'breathe:calm'], ['Talk to a specialist', 'ERP therapy is highly effective for OCD. A professional can guide it safely.', 'chat:I need help']] },
+  ptsd: { name: 'PTSD', icon: 'shield', blurb: 'Difficulty recovering after experiencing or witnessing a terrifying event.', tool: 'Trauma screener', stem: 'Over the past month, how often have you experienced:',
+    q: ['Unwanted, upsetting memories of a stressful event', 'Nightmares about the event', 'Avoiding reminders, places, or people linked to it', 'Feeling constantly on guard or easily startled', 'Feeling numb or detached from people or activities', 'Strong emotional or physical reactions to reminders'],
+    bands: [[4, 'minimal'], [8, 'mild'], [12, 'moderate'], [18, 'severe']],
+    tips: [['Grounding', 'When memories feel too close, anchor yourself in the present with 5-4-3-2-1.', 'chat:grounding exercise'], ['Slow breathing', 'Lengthening your exhale lowers the body\'s alarm response.', 'breathe:calm'], ['Trauma-informed help', 'Therapies like trauma-focused CBT and EMDR help many people recover.', 'chat:I need help']] }
+};
+const LEVEL_TEXT = {
+  minimal: 'Continue practicing self-care and reach out for support if you need it.',
+  mild: 'Keep using healthy coping tools, and check in with yourself again in a couple of weeks.',
+  moderate: 'It could really help to talk with a counselor, doctor, or someone you trust about how you have been feeling.',
+  severe: "Please consider reaching out to a mental health professional soon. You don't have to handle this alone."
+};
+let aState = null;
+const aRoot = $('#assessRoot');
+function renderConditions() {
+  aState = null;
+  aRoot.replaceChildren(
+    el('h1', { text: 'Choose a Condition' }),
+    el('p', { class: 'lead', text: 'Select the mental health condition you want to learn about or are experiencing symptoms of.' }),
+    el('div', { class: 'cond-grid' }, Object.entries(ASSESS).map(([k, c]) => el('button', { class: 'cond', onclick: () => startAssessment(k) },
+      el('span', { class: 'ic' }, icon(c.icon)), el('h3', { text: c.name }), el('p', { text: c.blurb }),
+      el('span', { class: 'tool-name', text: `${c.tool} · ${c.q.length} questions` }), el('span', { class: 'tag', text: 'Common in teens' }))))
+  );
+}
+function startAssessment(k) {
+  if (!ASSESS[k]) return renderConditions();
+  aState = { k, i: 0, ans: [] }; renderQuestion(); scrollTo(0, 0);
+}
+function renderQuestion() {
+  const c = ASSESS[aState.k], i = aState.i;
+  const track = el('div', { class: 'q-track' }); const f = el('i'); f.style.width = (i / c.q.length * 100) + '%'; track.append(f);
+  aRoot.replaceChildren(el('div', { class: 'q-card' },
+    el('div', { class: 'q-progress' }, el('span', { text: `${c.name} · ${c.tool}` }), el('span', { text: `${i + 1} / ${c.q.length}` })),
+    track,
+    el('p', { class: 'q-stem', text: c.stem }),
+    el('p', { class: 'q-text', text: c.q[i] }),
+    el('div', { class: 'opts' }, FREQ.map((o, v) => el('button', { class: 'opt', 'aria-pressed': String(aState.ans[i] === v), onclick: () => answer(v) }, el('span', { text: o }), el('span', { class: 'pts', text: '+' + v })))),
+    el('div', { class: 'q-nav' },
+      el('button', { class: 'linkbtn', disabled: i === 0 ? '' : null, onclick: () => { aState.i--; renderQuestion(); } }, '← Previous'),
+      el('button', { class: 'linkbtn', onclick: renderConditions }, 'Change condition'))
+  ));
+  $('.opt', aRoot)?.focus({ preventScroll: true });
+}
+function answer(v) {
+  aState.ans[aState.i] = v;
+  if (aState.i < ASSESS[aState.k].q.length - 1) { aState.i++; renderQuestion(); } else renderResult();
+}
+function runSugg(action) {
+  if (action.startsWith('chat:')) { location.hash = 'chat'; setTimeout(() => userSend(action.slice(5)), 350); }
+  else if (action.startsWith('breathe')) openBreath(action.split(':')[1]);
+  else if (action === 'journal') { location.hash = 'tools'; setTimeout(() => $('#jText').focus(), 300); }
+  else if (action === 'reframe') { location.hash = 'chat'; setTimeout(() => doAction('reframe'), 350); }
+}
+function renderResult() {
+  const c = ASSESS[aState.k];
+  const score = aState.ans.reduce((a, b) => a + b, 0), max = c.q.length * 3;
+  const level = c.bands.find(([hi]) => score <= hi)[1];
+  const risk = aState.k === 'depression' && aState.ans[8] > 0;
+  const mark = el('i'); mark.style.left = Math.min(100, score / max * 100) + '%';
+  const card = el('div', { class: 'res-card' },
+    el('h3', { text: c.name }),
+    el('span', { class: 'sev ' + level }, `${level[0].toUpperCase() + level.slice(1)} · ${score} / ${max}`),
+    el('div', { class: 'scale' }, el('div', { class: 'scale-bar' }, el('span'), el('span'), el('span'), el('span')), el('div', { class: 'scale-mark' }, mark), el('div', { class: 'scale-lbl' }, el('span', { text: 'minimal' }), el('span', { text: 'mild' }), el('span', { text: 'moderate' }), el('span', { text: 'severe' }))),
+    el('p', { text: `Your responses suggest ${level === 'minimal' ? 'mild or minimal' : level} symptoms related to ${c.name}. ${LEVEL_TEXT[level]}` }));
+  if (risk) card.append(el('div', { class: 'crisis-box' },
+    el('b', { text: 'You mentioned thoughts of being better off dead or hurting yourself.' }),
+    el('span', { text: "That's important, and you deserve support right now. Please talk to someone today:" }),
+    el('ul', {}, HELPLINES.map(h => el('li', {}, h.who + ': ', el('span', { class: 'n', text: h.num }))))));
+  card.append(el('p', { class: 'note', text: 'This assessment is for informational purposes only and is not a substitute for professional diagnosis.' }));
+  aRoot.replaceChildren(
+    el('h1', { text: 'Your Assessment Result' }),
+    el('div', { class: 'res-icon' }, icon(c.icon)),
+    card,
+    el('h2', { class: 'res-h', text: 'Suggestions & Resources' }),
+    el('div', { class: 'sugg-grid' }, c.tips.map(([t, d, a]) => el('div', { class: 'sugg' }, el('h4', { text: t }), el('p', { text: d }), el('button', { class: 'btn btn-ghost btn-sm', text: a.startsWith('chat:') ? 'Talk it through' : a === 'journal' ? 'Open journal' : a === 'reframe' ? 'Start thought record' : 'Try it now', onclick: () => runSugg(a) })))),
+    el('div', { style: 'display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px' },
+      el('a', { class: 'btn btn-primary', href: '#chat' }, icon('msg'), 'Talk to MindEase'),
+      el('button', { class: 'btn btn-ghost', onclick: renderConditions, text: 'Take another assessment' }))
+  );
+  scrollTo(0, 0);
+}
+
+/* ================= ROUTER ================= */
+let currentView = 'home';
+const HOME_ANCHORS = ['top', 'features', 'how', 'tools', 'results', 'about', 'support'];
+function route() {
+  const h = location.hash.replace('#', '');
+  const v = h === 'chat' ? 'chat' : h === 'assess' ? 'assess' : 'home';
+  const changed = v !== currentView; currentView = v;
+  $('#view-home').hidden = v !== 'home'; $('#view-assess').hidden = v !== 'assess'; $('#view-chat').hidden = v !== 'chat';
+  document.body.classList.toggle('app-mode', v === 'chat');
+  if (v === 'chat') { if (!chatStarted) resetChat(); setInspect(store.get('inspect', innerWidth > 1100)); setTimeout(() => $('#chatInput').focus({ preventScroll: true }), 50); scrollDown(); }
+  if (v === 'assess' && changed && !aState) renderConditions();
+  if (v === 'home') {
+    if (HOME_ANCHORS.includes(h)) requestAnimationFrame(() => document.getElementById(h)?.scrollIntoView());
+    else if (changed) scrollTo(0, 0);
+  } else if (changed && v === 'assess') scrollTo(0, 0);
+}
+$$('[data-back]').forEach(b => b.addEventListener('click', () => { if (currentView === 'assess' && aState) return renderConditions(); location.hash = 'top'; }));
+addEventListener('hashchange', route);
+
+applyLang(lang);
+renderConditions();
+route();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "mindease",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MindEase: an AI mental wellness companion with a rule-based crisis layer, CBT tools and self-check assessments.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:mock": "MINDEASE_MOCK=1 node scripts/dev.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
