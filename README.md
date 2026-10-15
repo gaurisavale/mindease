@@ -4,7 +4,7 @@ An AI mental wellness companion for teens and young adults. An LLM handles the c
 
 **Live demo:** _add your Vercel URL here_
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNileetSavale%2Fmindease&env=LLM_API_KEY&envDescription=Free%20Gemini%20API%20key%20for%20chat%20replies&envLink=https%3A%2F%2Faistudio.google.com%2Fapikey)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%gaurisavale%2Fmindease&env=LLM_API_KEY&envDescription=Free%20Gemini%20API%20key%20for%20chat%20replies&envLink=https%3A%2F%2Faistudio.google.com%2Fapikey)
 
 ## What it does
 
