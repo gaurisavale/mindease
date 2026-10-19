@@ -88,9 +88,10 @@ export function createHandler({ complete = completeWithTool } = {}) {
       const r = sanitise(out.input);
       if (!r.reply) throw new Error('empty reply');
       const flagged = r.risk_level === 'high' || r.risk_level === 'elevated';
+      const helplineStyle = r.risk_level === 'high' ? 'full' : r.risk_level === 'elevated' ? 'compact' : undefined;
       return send(res, 200, {
         type: r.risk_level === 'high' ? 'crisis-soft' : 'reply', ...r,
-        helplines: flagged ? HELPLINES : undefined,
+        helplines: flagged ? HELPLINES : undefined, helpline_style: helplineStyle,
         source: 'llm', model: out.model, latency_ms: Date.now() - t0, usage: out.usage
       });
     } catch (e) {
