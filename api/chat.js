@@ -92,12 +92,17 @@ export function createHandler({ complete = completeWithTool } = {}) {
       return send(res, 200, {
         type: r.risk_level === 'high' ? 'crisis-soft' : 'reply', ...r,
         helplines: flagged ? HELPLINES : undefined, helpline_style: helplineStyle,
-        source: 'llm', model: out.model, latency_ms: Date.now() - t0, usage: out.usage
+        source: 'llm', model: out.model, latency_ms: Date.now() - t0, usage: out.usage,
+        fallback_from: out.attempts && out.attempts.length ? out.attempts.map(a => `${a.model} (${a.status})`) : undefined
       });
     } catch (e) {
       console.error('[mindease] model error:', e?.status || '', e?.message);
-      if (e?.status === 503) return send(res, 503, { error: e.message });
-      return send(res, 502, { error: 'The AI service is unavailable right now.' });
+      if (e?.status === 503 && !e.attempts) return send(res, 503, { error: e.message });
+      const hint = e?.status === 429 ? 'Free-tier quota reached on every model. It resets daily; try again later or add a key from another provider.'
+        : (e?.status === 401 || e?.status === 403) ? 'The API key was rejected. Check LLM_API_KEY in Vercel and redeploy.'
+        : (e?.status === 400 || e?.status === 404) ? 'The model name or request was rejected. Check LLM_MODEL / LLM_FALLBACK_MODELS in Vercel.'
+        : 'The AI provider is having trouble right now.';
+      return send(res, 502, { error: hint, detail: String(e?.message || '').slice(0, 600), attempts: e?.attempts });
     }
   };
 }
