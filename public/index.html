@@ -301,6 +301,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .msg.crisis .bubble{background:var(--crit-soft);border-color:var(--crit)}
 .helplist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .help-item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:10px 12px;flex-wrap:wrap}
+.soft-help{margin-top:10px;font-size:13px;color:var(--muted)}
+.soft-help .hn{font-family:var(--f-mono);font-weight:600;color:var(--accent-text);user-select:all}
 .help-item .hn{font-family:var(--f-mono);font-weight:600;user-select:all;color:var(--crit)}
 .help-item small{display:block;color:var(--muted);font-size:12px}
 .record{margin-top:10px;background:var(--surface);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
@@ -875,6 +877,8 @@ const INTENTS = {
 const VOCAB = new Set([...Object.keys(LEX), ...Object.values(INTENTS).flatMap(i => i.w)]);
 
 const CRISIS = [
+  // Indirect phrasing and methods (high recall on purpose: a false alarm costs little, a miss can cost a life)
+  /\b(should\s+i\s+(just\s+)?jump(?!\s+(on|at|into|in|ship|the\s+gun|to\s+conclusions|ahead))|should\s+i\s+(just\s+)?(end\s+it|die|do\s+it)|jump(ing)?\s+(off|from)\s+(a|the|my)|jump(ing)?\s+in\s+front\s+of|hang(ing)?\s+my\s?self|slit(ting)?\s+my|(want\s+to|wanna|going\s+to|gonna|just)\s+end\s+it|unalive|kms|kys|sleep\s+forever|never\s+wake\s+up|(want\s+to|wanna)\s+disappear|disappear\s+forever|no\s+point\s+(in\s+)?(living|life|being\s+alive|going\s+on)|tired\s+of\s+(living|life|being\s+alive)|(everyone|everybody|they|world)\s+(would|will|d)?\s*(be\s+)?better\s+(off\s+)?without\s+me|wont\s+be\s+(around|here)\s+(much\s+longer|tomorrow|anymore)|goodbye\s+forever)/,
   /\b(kill(ing)?\s+my\s?self|suicid\w*|end(ing)?\s+(it\s+all|my\s+life|everything)|want\s+to\s+die|wanna\s+die|wish\s+i\s+(was|were)\s+dead|better\s+off\s+dead|take\s+my\s+(own\s+)?life|hurt(ing)?\s+my\s?self|harm(ing)?\s+my\s?self|self[\s-]?harm\w*|cut(ting)?\s+my\s?self|no\s+reason\s+to\s+live|dont\s+want\s+to\s+(live|be\s+alive|exist|wake\s+up)|cant\s+go\s+on|overdos\w*|not\s+worth\s+living)\b/,
   /(आत्महत्या|मरना\s*चाहत|मर\s*जाना\s*चाहत|जीना\s*नहीं\s*चाहत|खुद\s*को\s*(चोट|नुकसान)|मरायचं|मरायचे|जगायचं\s*नाही|जगायचे\s*नाही|marna\s+chaht|mar\s+jaana|jeena\s+nahi|khud\s+ko\s+(hurt|nuksan))/
 ];
@@ -1202,21 +1206,25 @@ async function askModel(a, key) {
       body: JSON.stringify({ lang, messages: history.slice(-16) }) });
     clearTimeout(to);
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw Object.assign(new Error(data.error || 'HTTP ' + res.status), { status: res.status });
+    if (!res.ok) throw Object.assign(new Error(data.error || 'HTTP ' + res.status), { status: res.status, detail: data.detail });
     stop();
     a.llm = { ...data, rtt: performance.now() - t0 };
     if (a === lastAnalysis) renderInspector();
     if (data.type === 'crisis') { a.route = 'crisis'; renderInspector(); return crisisReply(); }
     setMode(true, data.model);
-    const flagged = data.helplines && data.helplines.length;
-    botSay({ t: data.reply, chips: data.suggestions && data.suggestions.length ? data.suggestions : null,
-      extra: flagged ? el('div', {}, el('p', { style: 'margin-top:10px;font-weight:600', text: 'If things feel like too much, please talk to someone now:' }), helpList()) : null },
+    const style = data.helplines && data.helplines.length ? (data.helpline_style || 'full') : null;
+    const extra = style === 'full'
+      ? el('div', {}, el('p', { style: 'margin-top:10px;font-weight:600', text: 'If things feel like too much, please talk to someone now:' }), helpList())
+      : style === 'compact'
+        ? el('p', { class: 'soft-help' }, 'If it ever gets heavy, Tele-MANAS is free and 24/7: ', el('span', { class: 'hn', text: '14416' }))
+        : null;
+    botSay({ t: data.reply, chips: data.suggestions && data.suggestions.length ? data.suggestions : null, extra },
       { raw: true, cls: data.type === 'crisis-soft' ? 'crisis' : '' });
   } catch (e) {
     stop();
     if (e.status === 429) { a.llm = { source: 'rate-limited', error: e.message }; renderInspector(); return botSay({ t: e.message }, { raw: true }); }
     setMode(false);
-    a.llm = { source: 'offline', error: e.name === 'AbortError' ? 'timed out' : e.message, rtt: performance.now() - t0 };
+    a.llm = { source: 'offline', error: e.name === 'AbortError' ? 'timed out' : e.message, detail: e.detail, rtt: performance.now() - t0 };
     a.route = 'support';
     if (a === lastAnalysis) renderInspector();
     botSay(respond(key));
@@ -1257,9 +1265,9 @@ function renderInspector() {
     if (!L) body = [el('p', { class: 'i-empty', style: 'font-size:13px', text: 'Waiting for the model…' })];
     else if (L.source === 'llm') body = [
       el('div', { class: 'route' }, el('span', { class: 'risk ' + L.risk_level, text: 'risk: ' + L.risk_level }), el('span', { text: 'intent: ' + L.intent })),
-      el('div', { class: 'mem', text: `model: ${L.model}\nserver latency: ${L.latency_ms} ms\nround trip: ${Math.round(L.rtt)} ms` + (L.usage ? `\ntokens: ${L.usage.input} in / ${L.usage.output} out` : '') + `\nsuggestions: ${(L.suggestions || []).length}` })];
+      el('div', { class: 'mem', text: `model: ${L.model}\nserver latency: ${L.latency_ms} ms\nround trip: ${Math.round(L.rtt)} ms` + (L.usage ? `\ntokens: ${L.usage.input} in / ${L.usage.output} out` : '') + `\nsuggestions: ${(L.suggestions || []).length}` + (L.fallback_from ? `\nfell back from: ${L.fallback_from.join(', ')}` : '') })];
     else if (L.source === 'rules') body = [el('span', { class: 'flag hit', text: 'Server safety layer: crisis, model skipped' })];
-    else body = [el('div', { class: 'mem', text: `model unavailable (${L.error})\nfell back to local rules` })];
+    else body = [el('div', { class: 'mem', text: `model unavailable: ${L.error}` + (L.detail ? `\n\nprovider said: ${L.detail}` : '') + `\n\nfell back to local rules` })];
     root.append(sec('6 · Model output', L && L.source === 'llm' ? L.model : '', ...body));
   }
   root.append(sec('Session memory', a.ms.toFixed(2) + ' ms', el('div', { class: 'mem', text:
